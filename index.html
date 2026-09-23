@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>茶之時光</title>
+    <meta
+      name="description"
+      content="一個互動式中文文化課程，探索唐代與宋代茶文化。"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <button
+          class="sidebar-toggle"
+          id="sidebar-toggle"
+          type="button"
+          aria-expanded="true"
+          aria-controls="sidebar"
+          aria-label="收合側邊欄"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+
+        <div class="brand-block">
+          <h2>唐宋茶文化課程</h2>
+        </div>
+
+        <div class="progress-card">
+          <div class="progress-topline">
+            <span>學習進度</span>
+            <strong id="progress-text">33%</strong>
+          </div>
+          <div class="progress-bar" aria-hidden="true">
+            <span id="progress-fill"></span>
+          </div>
+        </div>
+
+        <nav class="course-nav" aria-label="課程導覽">
+          <button class="nav-step active" data-target="tang">
+            <span class="step-number">1</span>
+            <span class="step-meta">
+              <strong>唐代</strong>
+            </span>
+          </button>
+          <button class="nav-step" data-target="song">
+            <span class="step-number">2</span>
+            <span class="step-meta">
+              <strong>宋代</strong>
+            </span>
+          </button>
+          <button class="nav-step" data-target="review">
+            <span class="step-number">3</span>
+            <span class="step-meta">
+              <strong>複習</strong>
+            </span>
+          </button>
+        </nav>
+      </aside>
+
+      <main class="main-panel">
+        <section class="lesson-panel active" id="tang-panel">
+          <h2 class="dynasty-title">唐代</h2>
+          <div class="page-switcher" aria-label="唐代課程章節">
+            <button class="page-link active" data-dynasty="tang" data-page="reading" data-step="01">
+              <span class="timeline-label">文化與閱讀</span>
+            </button>
+            <button class="page-link" data-dynasty="tang" data-page="utensils" data-step="02">
+              <span class="timeline-label">茶器介紹</span>
+            </button>
+            <button class="page-link" data-dynasty="tang" data-page="process" data-step="03">
+              <span class="timeline-label">泡茶流程</span>
+            </button>
+          </div>
+
+          <button class="content-next-button" data-dynasty="tang" aria-label="下一頁">
+            <span class="content-next-label">下一頁</span> <span aria-hidden="true">→</span>
+          </button>
+
+          <div class="dynasty-page active" data-dynasty="tang" data-page="reading">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>1</span>
+                <h3>唐代茶文化背景</h3>
+              </div>
+
+              <div class="reading-card">
+                <p>
+                  對於唐代社會而言，經濟與文化都十分<span class="vocab" tabindex="0">繁榮<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">繁榮</span><span class="vocab-tip-pinyin">fán róng</span></span><span class="vocab-tip-pos">形容詞</span><span class="vocab-tip-meaning">發展得很好，經濟、文化等都很興盛。</span></span></span>，飲茶習慣也從南方逐漸<span class="vocab" tabindex="0">擴散<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">擴散</span><span class="vocab-tip-pinyin">kuò sàn</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">從一個地方或範圍慢慢傳到其他地方。</span></span></span>到全國各地。
+                  陸羽所寫的《茶經》以整理茶事為<span class="vocab" tabindex="0">核心<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">核心</span><span class="vocab-tip-pinyin">hé xīn</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">最重要、最主要的部分。</span></span></span>，內容涵蓋茶樹種植、採摘、製作與煮茶方法，
+                  <span class="vocab" tabindex="0">體現<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">體現</span><span class="vocab-tip-pinyin">tǐ xiàn</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">把某種特點、價值或想法表現出來。</span></span></span>了他對茶文化的全面觀察，因此陸羽被尊稱為「茶聖」。
+                </p>
+
+                <p>
+                  這個時期，飲茶不再只是解渴的日常需求，而是逐漸<span class="vocab" tabindex="0">納入<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">納入</span><span class="vocab-tip-pinyin">nà rù</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">把某人或某事物放進一個範圍或系統裡。</span></span></span>文人、僧侶的生活，社會上也開始出現專門飲茶的茶館。
+                </p>
+              </div>
+            </div>
+
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>2</span>
+                <h3>唐代飲茶哲學</h3>
+              </div>
+
+              <div class="reading-card">
+                <p>
+                  對唐代文人而言，飲茶不只是享受，也是一種<span class="vocab" tabindex="0">實踐<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">實踐</span><span class="vocab-tip-pinyin">shí jiàn</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">把某種思想或理念付諸行動、實際去做。</span></span></span>。
+                  儒家提倡以節制、簡樸為<span class="vocab" tabindex="0">核心<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">核心</span><span class="vocab-tip-pinyin">hé xīn</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">最重要、最主要的部分。</span></span></span>，透過喝茶培養好品格。
+                </p>
+                <p>
+                  道家重視順應自然，在泡茶時觀察水、火與茶的變化，<span class="vocab" tabindex="0">體悟<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">體悟</span><span class="vocab-tip-pinyin">tǐ wù</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">通過親身體驗而明白、理解。</span></span></span>自然的<span class="vocab" tabindex="0">秩序<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">秩序</span><span class="vocab-tip-pinyin">zhì xù</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">事物按一定規則、關係排列而形成的次序。</span></span></span>，藉以<span class="vocab" tabindex="0">擺脫<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">擺脫</span><span class="vocab-tip-pinyin">bǎi tuō</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">從困難、束縛或影響中脫離出來。</span></span></span>世俗牽絆。
+                </p>
+                <p>
+                  佛教則認為喝茶能保持清醒、專注，讓心安靜下來，體會禪的<span class="vocab" tabindex="0">境界<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">境界</span><span class="vocab-tip-pinyin">jìng jiè</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">事物達到的高級精神或情境狀態。</span></span></span>。
+                  三家雖然不同，但都把茶當成修心的<span class="vocab" tabindex="0">媒介<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">媒介</span><span class="vocab-tip-pinyin">méi jiè</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">用來傳達、聯繫或促成某種事物的工具或方式。</span></span></span>。
+                  就像現代人提倡專心感受當下的概念一樣。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="tang" data-page="utensils">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>2</span>
+                <h3>唐代煎茶器具</h3>
+              </div>
+
+              <div class="answer-header">請將器具配對到正確的用途</div>
+
+              <div class="utensil-game">
+                <div class="game-pool" id="tang-utensils">
+                  <div class="utensil-card" draggable="true" data-name="furnace">
+                    <div class="utensil-icon cup"></div>
+                    <span>風爐</span>
+                  </div>
+                  <div class="utensil-card" draggable="true" data-name="cauldron">
+                    <div class="utensil-icon pot"></div>
+                    <span>鍑（釜）</span>
+                  </div>
+                  <div class="utensil-card" draggable="true" data-name="grinder">
+                    <div class="utensil-icon cloth"></div>
+                    <span>茶碾</span>
+                  </div>
+                  <div class="utensil-card" draggable="true" data-name="sieve">
+                    <div class="utensil-icon scoop"></div>
+                    <span>羅合</span>
+                  </div>
+                </div>
+
+                <div class="drop-zone-panel">
+                  <div class="drop-slot" data-match="furnace">
+                    <small>可攜帶的小火爐，方便文人外出時煮茶</small>
+                  </div>
+                  <div class="drop-slot" data-match="cauldron">
+                    <small>放在風爐上煮茶湯的鍋子</small>
+                  </div>
+                  <div class="drop-slot" data-match="grinder">
+                    <small>把烤過的茶餅磨成細粉的器具</small>
+                  </div>
+                  <div class="drop-slot" data-match="sieve">
+                    <small>篩茶粉用的篩子，確保茶粉夠細</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="tang" data-page="process">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>3</span>
+                <h3>泡茶流程</h3>
+              </div>
+
+              <div class="process-scene">
+                <div class="tea-workbench">
+                  <div class="tea-leaf" id="tang-leaf" draggable="true">茶</div>
+                  <div class="kettle" id="tang-kettle">
+                    <div class="steam steam-one"></div>
+                    <div class="steam steam-two"></div>
+                    <div class="steam steam-three"></div>
+                  </div>
+                  <div class="brazier" id="tang-brazier">火</div>
+                  <div class="whisk" id="tang-whisk">筅</div>
+                  <div class="brew-bowl" id="tang-bowl">碗</div>
+                </div>
+
+                <div class="process-actions">
+                  <div class="process-task complete" data-step="1">
+                    <h4>1. 拖曳茶葉到壺中</h4>
+                    <p>將茶葉移入器具，開始泡茶。</p>
+                  </div>
+                  <div class="process-task" data-step="2">
+                    <h4>2. 點擊火爐加熱</h4>
+                    <p>讓水溫升高，讓茶香慢慢浮出。</p>
+                  </div>
+                  <div class="process-task" data-step="3">
+                    <h4>3. 按住茶筅攪動</h4>
+                    <p>讓茶湯均勻、溫潤有層次。</p>
+                  </div>
+                  <div class="process-task" data-step="4">
+                    <h4>4. 快速滑動鼠標擦過碗口</h4>
+                    <p>帶出細緻的泡沫，完成一盞茶。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lesson-panel" id="song-panel">
+          <h2 class="dynasty-title">宋代</h2>
+          <div class="page-switcher" aria-label="宋代課程章節">
+            <button class="page-link active" data-dynasty="song" data-page="reading" data-step="01">
+              <span class="timeline-label">文化與閱讀</span>
+            </button>
+            <button class="page-link" data-dynasty="song" data-page="utensils" data-step="02">
+              <span class="timeline-label">茶器介紹</span>
+            </button>
+            <button class="page-link" data-dynasty="song" data-page="process" data-step="03">
+              <span class="timeline-label">泡茶流程</span>
+            </button>
+          </div>
+
+          <button class="content-next-button" data-dynasty="song" aria-label="下一頁">
+            <span class="content-next-label">下一頁</span> <span aria-hidden="true">→</span>
+          </button>
+
+          <div class="dynasty-page active" data-dynasty="song" data-page="reading">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>1</span>
+                <h3>宋代茶文化背景</h3>
+              </div>
+
+              <div class="reading-card">
+                <p>
+                  對於宋代文人而言，飲茶比唐代更講究「<span class="vocab" tabindex="0">美感<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">美感</span><span class="vocab-tip-pinyin">měi gǎn</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">對美好事物的感受，或是對美的鑑賞能力。</span></span></span>」與「<span class="vocab" tabindex="0">精緻<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">精緻</span><span class="vocab-tip-pinyin">jīng zhì</span></span><span class="vocab-tip-pos">形容詞</span><span class="vocab-tip-meaning">精巧細緻，製作或呈現得非常講究、用心。</span></span></span>」。
+                </p>
+                <p>
+                  之所以會有這種變化，是因為宋代的經濟更加繁榮、城市生活也比較發達，一般市民也能接觸飲茶這種休閒活動；加上印刷術普及，茶書、茶詩得以廣泛<span class="vocab" tabindex="0">流傳<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">流傳</span><span class="vocab-tip-pinyin">liú chuán</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">事物、消息或作品等一直傳下去，傳到後世或各地。</span></span></span>，飲茶知識更容易累積，因此宋代茶文化格外精緻，<span class="vocab" tabindex="0">體現<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">體現</span><span class="vocab-tip-pinyin">tǐ xiàn</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">把某種特點、價值或想法表現出來。</span></span></span>出宋人涵養內心、講究細節的態度。
+                </p>
+              </div>
+            </div>
+
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>2</span>
+                <h3>宋代四藝與格物致知</h3>
+              </div>
+
+              <div class="reading-card">
+                <p>
+                  對於宋代的文人而言，飲茶不只是解渴，而是一種生活美學的追求。點茶者透過精細地<span class="vocab" tabindex="0">調控<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">調控</span><span class="vocab-tip-pinyin">tiáo kòng</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">調整並控制，使之達到適當的狀態。</span></span></span>水溫與<span class="vocab" tabindex="0">攪打<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">攪打</span><span class="vocab-tip-pinyin">jiǎo dǎ</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">用工具快速攪動、拍打，使材料充分混合或起泡。</span></span></span>力道，觀察茶湯<span class="vocab" tabindex="0">泡沫<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">泡沫</span><span class="vocab-tip-pinyin">pào mò</span></span><span class="vocab-tip-pos">名詞</span><span class="vocab-tip-meaning">液體中聚集的許多小氣泡。</span></span></span>的變化，使點茶不再是單純的享樂，而是一種精神生活的<span class="vocab" tabindex="0">體現<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">體現</span><span class="vocab-tip-pinyin">tǐ xiàn</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">把某種特點、價值或想法表現出來。</span></span></span>。
+                </p>
+                <p>
+                  文人更將點茶與<span class="vocab" tabindex="0">插花<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">插花</span><span class="vocab-tip-pinyin">chā huā</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">把花朵剪裁後依照美感原則加以安排、擺設的技藝。</span></span></span>、<span class="vocab" tabindex="0">焚香<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">焚香</span><span class="vocab-tip-pinyin">fén xiāng</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">點燃香料，讓香氣散發，用以靜心或營造氣氛。</span></span></span>、<span class="vocab" tabindex="0">掛畫<span class="vocab-tip" role="tooltip"><span class="vocab-tip-row"><span class="vocab-tip-word">掛畫</span><span class="vocab-tip-pinyin">guà huà</span></span><span class="vocab-tip-pos">動詞</span><span class="vocab-tip-meaning">將書畫作品懸掛展示，用以布置空間、陶冶性情。</span></span></span>並列為生活四藝，體現了宋代時文人對於飲茶的雅致追求。
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="song" data-page="utensils">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>2</span>
+                <h3>宋代點茶器具</h3>
+              </div>
+
+              <div class="utensil-game">
+                <div class="game-pool" id="song-utensils">
+                  <div class="utensil-card" draggable="true" data-name="chasen">
+                    <div class="utensil-icon chasen"></div>
+                    <span>茶筅</span>
+                  </div>
+                  <div class="utensil-card" draggable="true" data-name="zhan">
+                    <div class="utensil-icon bowl"></div>
+                    <span>茶盞</span>
+                  </div>
+                  <div class="utensil-card" draggable="true" data-name="tangping">
+                    <div class="utensil-icon pot"></div>
+                    <span>湯瓶</span>
+                  </div>
+                </div>
+
+                <div class="drop-zone-panel">
+                  <div class="drop-slot" data-match="chasen">
+                    <span class="slot-label">茶筅</span>
+                    <small>竹製的打茶工具，形狀像迷你打蛋器，用來攪打茶湯、製造泡沫</small>
+                  </div>
+                  <div class="drop-slot" data-match="zhan">
+                    <span class="slot-label">茶盞</span>
+                    <small>喝茶用的碗，宋代流行黑色茶碗，因為黑色背景最能襯托白色泡沫，方便看茶打得好不好</small>
+                  </div>
+                  <div class="drop-slot" data-match="tangping">
+                    <span class="slot-label">湯瓶</span>
+                    <small>裝熱水的瓶子，瓶嘴設計方便控制水流，倒水時能配合攪打節奏</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="song" data-page="process">
+            <div class="lesson-block">
+              <div class="block-heading">
+                <span>3</span>
+                <h3>泡茶流程</h3>
+              </div>
+
+              <div class="process-scene">
+                <div class="tea-workbench">
+                  <div class="tea-leaf song-leaf" id="song-leaf" draggable="true">茶</div>
+                  <div class="kettle song-kettle" id="song-kettle"></div>
+                  <div class="brazier" id="song-brazier">火</div>
+                  <div class="whisk" id="song-whisk">筅</div>
+                  <div class="brew-bowl" id="song-bowl">碗</div>
+                </div>
+
+                <div class="process-actions">
+                  <div class="process-task complete" data-step="1">
+                    <h4>1. 拖曳茶餅至暖壺處</h4>
+                    <p>將茶葉帶到準備區域。</p>
+                  </div>
+                  <div class="process-task" data-step="2">
+                    <h4>2. 點擊火爐開始加熱</h4>
+                    <p>以溫和火候控制茶水的溫度。</p>
+                  </div>
+                  <div class="process-task" data-step="3">
+                    <h4>3. 按住茶筅連續攪動</h4>
+                    <p>讓茶湯更為細緻順滑，帶出細泡。</p>
+                  </div>
+                  <div class="process-task" data-step="4">
+                    <h4>4. 滑動鼠標擦過茶碗</h4>
+                    <p>完成一杯細緻均勻的茶。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lesson-panel review-panel" id="review-panel">
+          <header class="panel-header review-header">
+            <div>
+              <p class="eyebrow">複習</p>
+              <h1>比較唐代與宋代的茶文化</h1>
+            </div>
+          </header>
+
+          <div class="review-grid">
+            <div class="review-card compare-card">
+              <h3>唐代 vs. 宋代</h3>
+              <div class="comparison-list">
+                <div>
+                  <strong>唐代</strong>
+                  <p>茶與禮儀、待客與正式儀式密切相關，重視秩序與敬重之意。</p>
+                </div>
+                <div>
+                  <strong>宋代</strong>
+                  <p>茶強調精緻感、靜謐氛圍與個人品味，重視生活中的雅趣。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="review-card question-card">
+              <h3>文化問題</h3>
+              <ol>
+                <li>唐代茶文化如何展現尊重與秩序？</li>
+                <li>宋代茶文化為什麼特別重視細節？</li>
+                <li>兩個時代都重要的價值是什麼？</li>
+              </ol>
+            </div>
+
+            <div class="review-card grammar-card">
+              <h3>語法回顧</h3>
+              <ul>
+                <li>以…为… = 表示「把……當作……」</li>
+                <li>先…再… = 表示「先……，再……」</li>
+                <li>既…又… = 表示「既……，又……」</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
