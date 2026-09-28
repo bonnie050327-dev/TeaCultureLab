@@ -663,14 +663,22 @@ button { cursor: pointer; }
   color: var(--text1);
 }
 
-/* ── Utensil matching game ──────────────────────────────────────────── */
+/* ── Utensil matching game ─────────────────────────────────────────────
+   Photo grid on top (2 columns), matching explanations stacked below —
+   rather than the old side-by-side pool/answers layout — so each photo
+   can run much bigger. */
 .utensil-game {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.game-pool {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-md);
 }
 
-.game-pool,
 .drop-zone-panel {
   display: grid;
   gap: var(--space-sm);
@@ -679,9 +687,10 @@ button { cursor: pointer; }
 
 .utensil-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-md);
-  padding: 10px var(--space-md);
+  gap: var(--space-sm);
+  padding: var(--space-md);
   background: var(--surface1);
   border: 1px solid var(--border-visible);
   border-radius: var(--radius-component);
@@ -689,6 +698,7 @@ button { cursor: pointer; }
   font-family: var(--font-display);
   font-size: var(--text-body-sm);
   font-weight: 600;
+  text-align: center;
   cursor: grab;
   user-select: none;
   transition: transform 250ms ease-out, border-color 250ms ease-out;
@@ -700,13 +710,14 @@ button { cursor: pointer; }
 
 /* Real product photos (transparent background) sitting in a soft tinted
    frame — object-fit: contain keeps each item's own aspect ratio instead of
-   cropping it, since the source photos aren't all square. */
+   cropping it, since the source photos aren't all square. Square aspect
+   ratio + full card width is what makes the 2-column grid read as photos
+   first, labels second. */
 .utensil-icon {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-  padding: 6px;
-  border-radius: var(--radius-control);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  padding: var(--space-lg);
+  border-radius: var(--radius-component);
   background: var(--accent-subtle);
   object-fit: contain;
   object-position: center;
@@ -1081,11 +1092,12 @@ button { cursor: pointer; }
   .main-panel { padding: var(--space-lg) var(--space-lg) var(--space-4xl); }
 
   .review-grid,
-  .utensil-game,
   .process-scene { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
+  .game-pool { grid-template-columns: 1fr; }
+
   .panel-header {
     flex-direction: column;
     align-items: flex-start;
