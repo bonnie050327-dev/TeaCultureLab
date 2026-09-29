@@ -181,40 +181,190 @@
             <div class="lesson-block">
               <div class="block-heading">
                 <span>3</span>
-                <h3>泡茶流程</h3>
+                <h3>來煮一鍑唐茶</h3>
               </div>
 
-              <div class="process-scene">
-                <div class="tea-workbench">
-                  <div class="tea-leaf" id="tang-leaf" draggable="true">茶</div>
-                  <div class="kettle" id="tang-kettle">
-                    <div class="steam steam-one"></div>
-                    <div class="steam steam-two"></div>
-                    <div class="steam steam-three"></div>
-                  </div>
-                  <div class="brazier" id="tang-brazier">火</div>
-                  <div class="whisk" id="tang-whisk">筅</div>
-                  <div class="brew-bowl" id="tang-bowl">碗</div>
-                </div>
+              <div class="dc-header-row">
+                <div class="answer-header">點選下方的步驟按鈕，依正確順序完成一鍑唐代煎茶。順序錯了會有提示，可以再試一次。</div>
+                <button class="dc-restart" id="tcRestart" type="button" aria-label="重新開始">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 3-6.7" />
+                    <path d="M3 4v5h5" />
+                  </svg>
+                  重新開始
+                </button>
+              </div>
 
-                <div class="process-actions">
-                  <div class="process-task complete" data-step="1">
-                    <h4>1. 拖曳茶葉到壺中</h4>
-                    <p>將茶葉移入器具，開始泡茶。</p>
-                  </div>
-                  <div class="process-task" data-step="2">
-                    <h4>2. 點擊火爐加熱</h4>
-                    <p>讓水溫升高，讓茶香慢慢浮出。</p>
-                  </div>
-                  <div class="process-task" data-step="3">
-                    <h4>3. 按住茶筅攪動</h4>
-                    <p>讓茶湯均勻、溫潤有層次。</p>
-                  </div>
-                  <div class="process-task" data-step="4">
-                    <h4>4. 快速滑動鼠標擦過碗口</h4>
-                    <p>帶出細緻的泡沫，完成一盞茶。</p>
-                  </div>
-                </div>
+              <div class="dc-scene-wrap" id="tcSceneWrap">
+                <svg class="dc-scene" id="tcScene" data-step="0" viewBox="0 0 500 360" role="img" aria-label="煎茶示意圖">
+                  <defs>
+                    <radialGradient id="tcPotGrad" cx="42%" cy="25%" r="80%">
+                      <stop offset="0%" stop-color="#4A4A48" />
+                      <stop offset="55%" stop-color="#2E2E2C" />
+                      <stop offset="100%" stop-color="#141413" />
+                    </radialGradient>
+                    <radialGradient id="tcWaterGrad" cx="46%" cy="35%" r="70%">
+                      <stop offset="0%" stop-color="#B9C4C6" />
+                      <stop offset="100%" stop-color="#8B9A9C" />
+                    </radialGradient>
+                    <radialGradient id="tcTeaGrad" cx="45%" cy="35%" r="70%">
+                      <stop offset="0%" stop-color="#A9B36E" />
+                      <stop offset="100%" stop-color="#7C8544" />
+                    </radialGradient>
+                    <radialGradient id="tcFireGrad" cx="50%" cy="35%" r="65%">
+                      <stop offset="0%" stop-color="#FFD27A" />
+                      <stop offset="55%" stop-color="#FF8A3D" />
+                      <stop offset="100%" stop-color="#C0392B" />
+                    </radialGradient>
+                    <clipPath id="tcPotInteriorClip">
+                      <ellipse cx="260" cy="167" rx="82" ry="11" />
+                    </clipPath>
+                  </defs>
+
+                  <!-- ground shadow -->
+                  <ellipse cx="260" cy="322" rx="130" ry="12" fill="rgba(43,38,32,.14)" />
+
+                  <!-- 風爐 (stove), always present -->
+                  <path d="M206,258 Q206,250 216,250 L304,250 Q314,250 314,258 L314,306 Q314,314 304,314 L216,314 Q206,314 206,306 Z" fill="#8A7361" />
+                  <path d="M206,258 Q206,250 216,250 L304,250 Q314,250 314,258 L314,266 L206,266 Z" fill="#9C8A76" opacity=".6" />
+                  <path d="M234,302 Q234,270 260,270 Q286,270 286,302 Z" fill="#1A1210" />
+                  <g id="tcFireGlow">
+                    <ellipse cx="260" cy="293" rx="19" ry="11" fill="url(#tcFireGrad)" opacity=".85" />
+                    <path d="M248,298 Q246,282 258,272 Q252,286 260,292 Q262,280 270,274 Q276,288 272,298 Q266,304 258,304 Q250,304 248,298 Z" fill="url(#tcFireGrad)" />
+                  </g>
+
+                  <!-- 鍑 legs -->
+                  <path d="M222,228 L242,228 L238,248 L226,248 Z" fill="#1C1C1A" />
+                  <path d="M250,229 L270,229 L267,250 L253,250 Z" fill="#1C1C1A" />
+                  <path d="M278,228 L298,228 L294,248 L282,248 Z" fill="#1C1C1A" />
+
+                  <!-- 鍑 (cauldron): wide mouth, bulging round belly, side view -->
+                  <path d="M165,168 C138,185 142,213 205,228 L315,228 C378,213 382,185 355,168 A95,14 0 0 1 165,168 Z" fill="url(#tcPotGrad)" />
+
+                  <ellipse cx="260" cy="167" rx="88" ry="13" fill="url(#tcWaterGrad)" />
+
+                  <!-- pot contents: water / bubbles / waves / foam, inset within the rim -->
+                  <g clip-path="url(#tcPotInteriorClip)">
+                    <ellipse id="tcTeaTint" cx="260" cy="167" rx="82" ry="11" fill="url(#tcTeaGrad)" opacity="0" />
+
+                    <g id="tcFishEyes">
+                      <circle cx="228" cy="163" r="2.6" fill="#EFEFEA" />
+                      <circle cx="246" cy="170" r="2.1" fill="#EFEFEA" />
+                      <circle cx="268" cy="162" r="2.4" fill="#EFEFEA" />
+                      <circle cx="288" cy="169" r="2" fill="#EFEFEA" />
+                      <circle cx="256" cy="173" r="1.8" fill="#EFEFEA" />
+                    </g>
+
+                    <g id="tcSalt">
+                      <circle cx="238" cy="166" r="1.6" fill="#FFFFFF" />
+                      <circle cx="252" cy="161" r="1.4" fill="#FFFFFF" />
+                      <circle cx="266" cy="168" r="1.5" fill="#FFFFFF" />
+                      <circle cx="280" cy="163" r="1.3" fill="#FFFFFF" />
+                      <circle cx="246" cy="172" r="1.2" fill="#FFFFFF" />
+                    </g>
+
+                    <g id="tcEdgeBubbles">
+                      <circle cx="182" cy="166" r="2.6" fill="#E7E9E2" />
+                      <circle cx="196" cy="159" r="2.2" fill="#E7E9E2" />
+                      <circle cx="212" cy="155" r="2.4" fill="#E7E9E2" />
+                      <circle cx="308" cy="166" r="2.6" fill="#E7E9E2" />
+                      <circle cx="294" cy="159" r="2.2" fill="#E7E9E2" />
+                      <circle cx="278" cy="155" r="2.4" fill="#E7E9E2" />
+                      <circle cx="245" cy="153" r="2" fill="#E7E9E2" />
+                      <circle cx="262" cy="153" r="2" fill="#E7E9E2" />
+                    </g>
+
+                    <path id="tcWaves" d="M178,164 Q188,152 198,164 Q208,176 218,164 Q228,152 238,164 Q248,176 258,164 Q268,152 278,164 Q288,176 298,164 Q308,152 318,164 Q328,176 338,164"
+                          fill="none" stroke="#DEE3DC" stroke-width="3.2" stroke-linecap="round" />
+
+                    <g id="tcFoam">
+                      <circle cx="220" cy="164" r="2.6" fill="#EFE9D6" opacity=".9" />
+                      <circle cx="236" cy="169" r="2.1" fill="#EFE9D6" opacity=".85" />
+                      <circle cx="252" cy="162" r="2.4" fill="#EFE9D6" opacity=".9" />
+                      <circle cx="268" cy="170" r="2" fill="#EFE9D6" opacity=".85" />
+                      <circle cx="284" cy="163" r="2.3" fill="#EFE9D6" opacity=".9" />
+                      <circle cx="298" cy="168" r="1.9" fill="#EFE9D6" opacity=".8" />
+                      <circle cx="244" cy="173" r="1.8" fill="#EFE9D6" opacity=".85" />
+                      <circle cx="272" cy="173" r="1.7" fill="#EFE9D6" opacity=".8" />
+                    </g>
+                  </g>
+
+                  <!-- 瓢 (ladle), appears beside the pot while carrying water + tea powder -->
+                  <g id="tcLadle">
+                    <ellipse cx="398" cy="196" rx="26" ry="10" fill="#C9A268" />
+                    <path d="M372,196 C372,208 384,214 398,214 C412,214 424,208 424,196" fill="none" stroke="#A9824A" stroke-width="2.4" stroke-linecap="round" opacity=".6" />
+                    <path d="M420,199 L446,210" fill="none" stroke="#8B6A3A" stroke-width="4" stroke-linecap="round" />
+                  </g>
+
+                  <!-- tea cake / ground tea pile, left of the stove -->
+                  <g id="tcCakeRaw">
+                    <ellipse cx="78" cy="192" rx="38" ry="13" fill="#C9A268" />
+                    <ellipse cx="78" cy="188" rx="30" ry="9" fill="#D9B87E" opacity=".6" />
+                  </g>
+
+                  <g id="tcCakeToasted">
+                    <ellipse cx="78" cy="192" rx="38" ry="13" fill="#8B5A2B" />
+                    <ellipse cx="78" cy="188" rx="28" ry="8" fill="#A9713A" opacity=".6" />
+                    <path class="tc-flame" d="M70,206 Q68,196 78,190 Q73,200 79,204 Q81,196 87,192 Q92,202 88,208 Q83,213 78,213 Q72,213 70,206 Z" fill="url(#tcFireGrad)" />
+                    <path class="tc-aroma-wisp" d="M62,176 q-8,-14 0,-26 q8,-12 0,-24" fill="none" stroke="#E8C589" stroke-width="3.4" stroke-linecap="round" opacity=".55" />
+                    <path class="tc-aroma-wisp" d="M78,172 q8,-14 0,-26 q-8,-12 0,-24" fill="none" stroke="#E8C589" stroke-width="3.4" stroke-linecap="round" opacity=".55" />
+                    <path class="tc-aroma-wisp" d="M94,176 q-8,-14 0,-26 q8,-12 0,-24" fill="none" stroke="#E8C589" stroke-width="3.4" stroke-linecap="round" opacity=".55" />
+                  </g>
+
+                  <g id="tcPileCoarse">
+                    <ellipse cx="78" cy="196" rx="32" ry="10" fill="rgba(43,38,32,.14)" />
+                    <path d="M52,192 q6,-16 20,-14 q4,-12 18,-8 q10,-6 20,2 q10,-4 16,6 q-4,14 -18,14 q-2,8 -14,8 q-10,6 -22,0 q-14,2 -20,-8 Z" fill="#6B4A2B" />
+                    <circle cx="62" cy="188" r="2.6" fill="#553A20" />
+                    <circle cx="74" cy="182" r="2.2" fill="#7A5834" />
+                    <circle cx="88" cy="186" r="2.8" fill="#553A20" />
+                  </g>
+
+                  <g id="tcPileFine">
+                    <ellipse cx="78" cy="196" rx="32" ry="10" fill="rgba(43,38,32,.14)" />
+                    <path d="M50,194 q4,-18 24,-16 q6,-10 20,-6 q10,-8 22,0 q10,-2 14,8 q2,12 -14,14 q-4,8 -18,6 q-12,6 -26,0 q-16,0 -22,-6 Z" fill="#B4A06C" />
+                    <ellipse cx="78" cy="188" rx="24" ry="6" fill="#C9B888" opacity=".7" />
+                  </g>
+
+                  <!-- 分茶: three small bowls to the right of the pot -->
+                  <g id="tcBowls">
+                    <g transform="translate(384,252)">
+                      <path d="M0,0 C-4,10 2,20 18,24 C34,20 40,10 36,0 A18,4 0 0 1 0,0 Z" fill="#D8D2C0" />
+                      <ellipse cx="18" cy="1" rx="17" ry="4" fill="#8FA05C" />
+                      <circle cx="12" cy="0" r="1.4" fill="#EFE9D6" />
+                      <circle cx="22" cy="1.4" r="1.2" fill="#EFE9D6" />
+                    </g>
+                    <g transform="translate(430,252)">
+                      <path d="M0,0 C-4,10 2,20 18,24 C34,20 40,10 36,0 A18,4 0 0 1 0,0 Z" fill="#D8D2C0" />
+                      <ellipse cx="18" cy="1" rx="17" ry="4" fill="#8FA05C" />
+                      <circle cx="12" cy="0" r="1.4" fill="#EFE9D6" />
+                      <circle cx="22" cy="1.4" r="1.2" fill="#EFE9D6" />
+                    </g>
+                    <g transform="translate(407,280)">
+                      <path d="M0,0 C-4,10 2,20 18,24 C34,20 40,10 36,0 A18,4 0 0 1 0,0 Z" fill="#D8D2C0" />
+                      <ellipse cx="18" cy="1" rx="17" ry="4" fill="#8FA05C" />
+                      <circle cx="12" cy="0" r="1.4" fill="#EFE9D6" />
+                      <circle cx="22" cy="1.4" r="1.2" fill="#EFE9D6" />
+                    </g>
+                  </g>
+                </svg>
+              </div>
+
+              <p class="dc-status" id="tcStatus" aria-live="polite"></p>
+
+              <div class="dc-actions" id="tcActions">
+                <button class="dc-action-btn" data-action="zhi" type="button"><span class="dc-check">✓</span><span>炙茶</span></button>
+                <button class="dc-action-btn" data-action="qushui" type="button"><span class="dc-check">✓</span><span>取一瓢水並投入茶粉</span></button>
+                <button class="dc-action-btn" data-action="nian" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
+                <button class="dc-action-btn" data-action="re" type="button"><span class="dc-check">✓</span><span id="tcReLabel">加熱（一沸）</span></button>
+                <button class="dc-action-btn" data-action="daohui" type="button"><span class="dc-check">✓</span><span>倒回瓢水</span></button>
+                <button class="dc-action-btn" data-action="shai" type="button"><span class="dc-check">✓</span><span>篩茶</span></button>
+                <button class="dc-action-btn" data-action="fencha" type="button"><span class="dc-check">✓</span><span>分茶</span></button>
+                <button class="dc-action-btn" data-action="yan" type="button"><span class="dc-check">✓</span><span>加鹽</span></button>
+              </div>
+
+              <div class="dc-summary" id="tcSummary" hidden>
+                <h4>煎茶小結</h4>
+                <p>唐代煎茶講究每一沸的時機：一沸加鹽，二沸投茶，三沸止沸。從炙茶到分茶，體現了唐人飲茶的文化修養。</p>
               </div>
             </div>
           </div>

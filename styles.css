@@ -1192,6 +1192,82 @@ button { cursor: pointer; }
   .dc-action-btn { flex: 1 1 42%; }
 }
 
+/* ── 煎茶模擬 (tang brewing process) ────────────────────────────────────
+   Shares every .dc-* chrome class with the song simulation (buttons,
+   status line, restart, summary, shake/pulse) — only the scene's own
+   element visibility per data-step is specific to tang. */
+#tcFireGlow,
+#tcCakeRaw,
+#tcCakeToasted,
+#tcPileCoarse,
+#tcPileFine,
+#tcFishEyes,
+#tcSalt,
+#tcEdgeBubbles,
+#tcWaves,
+#tcFoam,
+#tcLadle,
+#tcBowls {
+  opacity: 0;
+  transition: opacity 280ms ease;
+}
+#tcTeaTint { transition: opacity 380ms ease; }
+
+.dc-scene[data-step="0"] #tcCakeRaw { opacity: 1; }
+.dc-scene[data-step="1"] #tcCakeToasted { opacity: 1; }
+.dc-scene[data-step="2"] #tcPileCoarse { opacity: 1; }
+.dc-scene[data-step="3"] #tcPileFine,
+.dc-scene[data-step="4"] #tcPileFine,
+.dc-scene[data-step="5"] #tcPileFine,
+.dc-scene[data-step="6"] #tcPileFine { opacity: 1; }
+
+.dc-scene[data-step="4"] #tcFireGlow,
+.dc-scene[data-step="5"] #tcFireGlow,
+.dc-scene[data-step="6"] #tcFireGlow,
+.dc-scene[data-step="7"] #tcFireGlow,
+.dc-scene[data-step="8"] #tcFireGlow { opacity: 1; }
+
+.dc-scene[data-step="4"] #tcFishEyes,
+.dc-scene[data-step="5"] #tcFishEyes { opacity: 1; }
+.dc-scene[data-step="5"] #tcSalt { opacity: 1; }
+.dc-scene[data-step="6"] #tcEdgeBubbles,
+.dc-scene[data-step="7"] #tcEdgeBubbles { opacity: 1; }
+.dc-scene[data-step="8"] #tcWaves { opacity: 1; }
+.dc-scene[data-step="9"] #tcFoam,
+.dc-scene[data-step="10"] #tcFoam { opacity: 1; }
+
+.dc-scene[data-step="7"] #tcLadle,
+.dc-scene[data-step="8"] #tcLadle { opacity: 1; }
+
+.dc-scene[data-step="7"] #tcTeaTint,
+.dc-scene[data-step="8"] #tcTeaTint,
+.dc-scene[data-step="9"] #tcTeaTint,
+.dc-scene[data-step="10"] #tcTeaTint { opacity: .85; }
+
+.dc-scene[data-step="10"] #tcBowls { opacity: 1; }
+
+.dc-scene[data-step="1"] .tc-flame {
+  animation: tc-flicker 1.1s ease-in-out infinite;
+}
+@keyframes tc-flicker {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.12) translateY(-2px); }
+}
+
+.dc-scene[data-step="1"] .tc-aroma-wisp {
+  animation: dc-rise 2.1s ease-in-out infinite;
+}
+.dc-scene[data-step="1"] .tc-aroma-wisp:nth-child(2) { animation-delay: .35s; }
+.dc-scene[data-step="1"] .tc-aroma-wisp:nth-child(3) { animation-delay: .7s; }
+
+.dc-scene[data-step="8"] #tcWaves {
+  animation: tc-roll 1.4s ease-in-out infinite;
+}
+@keyframes tc-roll {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2.5px); }
+}
+
 /* ── Review ─────────────────────────────────────────────────────────── */
 .review-header { margin-bottom: var(--space-xl); }
 

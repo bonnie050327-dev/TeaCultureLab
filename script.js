@@ -305,90 +305,9 @@ const songPanel = document.getElementById("song-panel");
 if (tangPanel) setupUtensilMatching(tangPanel);
 if (songPanel) setupUtensilMatching(songPanel);
 
-function setupTeaProcess(panelRoot) {
-  const panelPrefix = panelRoot.id.replace("-panel", "");
-  const teaLeaf = document.getElementById(`${panelPrefix}-leaf`);
-  const kettle = document.getElementById(`${panelPrefix}-kettle`);
-  const brazier = document.getElementById(`${panelPrefix}-brazier`);
-  const whisk = document.getElementById(`${panelPrefix}-whisk`);
-  const bowl = document.getElementById(`${panelPrefix}-bowl`);
-  const taskBlocks = panelRoot.querySelectorAll(".process-task");
-
-  if (!teaLeaf || !kettle || !brazier || !whisk || !bowl) return;
-
-  const completeTask = (step) => {
-    taskBlocks.forEach((task) => {
-      const activeStep = Number(task.dataset.step);
-      if (activeStep === step) {
-        task.classList.add("complete");
-      }
-    });
-  };
-
-  teaLeaf.addEventListener("dragstart", (event) => {
-    event.dataTransfer.setData("text/plain", "tea");
-    teaLeaf.classList.add("dragging");
-  });
-
-  teaLeaf.addEventListener("dragend", () => {
-    teaLeaf.classList.remove("dragging");
-  });
-
-  kettle.addEventListener("dragover", (event) => {
-    event.preventDefault();
-  });
-
-  kettle.addEventListener("drop", (event) => {
-    event.preventDefault();
-    teaLeaf.style.left = "58%";
-    teaLeaf.style.top = "58%";
-    teaLeaf.style.opacity = "0.15";
-    completeTask(1);
-  });
-
-  brazier.addEventListener("click", () => {
-    brazier.classList.toggle("active");
-    kettle.classList.toggle("hot");
-    if (brazier.classList.contains("active")) {
-      completeTask(2);
-    }
-  });
-
-  whisk.addEventListener("mousedown", () => {
-    whisk.classList.add("churning");
-    completeTask(3);
-  });
-
-  whisk.addEventListener("mouseup", () => {
-    whisk.classList.remove("churning");
-  });
-
-  whisk.addEventListener("mouseleave", () => {
-    whisk.classList.remove("churning");
-  });
-
-  bowl.addEventListener("mousemove", (event) => {
-    if (!brazier.classList.contains("active") || !whisk.classList.contains("churning")) return;
-    const rect = bowl.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    if (x > 0 && y > 0 && x < rect.width && y < rect.height) {
-      bowl.classList.add("foamy");
-      completeTask(4);
-    }
-  });
-
-  bowl.addEventListener("mouseenter", () => {
-    if (brazier.classList.contains("active") && whisk.classList.contains("churning")) {
-      bowl.classList.add("foamy");
-      completeTask(4);
-    }
-  });
-}
-
-if (tangPanel) setupTeaProcess(tangPanel);
-// Song's 泡茶流程 page uses the dedicated 點茶 simulation (setupDianCha) below
-// instead of the drag/click workbench tang uses.
+// Both tang's 煎茶 and song's 點茶 process pages use their own dedicated
+// simulations (setupJianCha / setupDianCha below) instead of a shared
+// drag/click workbench.
 
 /* ── 宋代點茶模擬 ──────────────────────────────────────────────────── */
 function setupDianCha() {
@@ -568,6 +487,176 @@ function setupDianCha() {
 }
 
 setupDianCha();
+
+/* ── 唐代煎茶模擬 ──────────────────────────────────────────────────── */
+function setupJianCha() {
+  const scene = document.getElementById("tcScene");
+  const sceneWrap = document.getElementById("tcSceneWrap");
+  const statusEl = document.getElementById("tcStatus");
+  const actionsEl = document.getElementById("tcActions");
+  const summaryEl = document.getElementById("tcSummary");
+  const restartBtn = document.getElementById("tcRestart");
+  const reLabel = document.getElementById("tcReLabel");
+
+  if (!scene || !sceneWrap || !statusEl || !actionsEl || !summaryEl || !restartBtn || !reLabel) return;
+
+  const START_MSG = "先從第一步開始吧！";
+
+  const SUCCESS_MSG = {
+    1: "茶餅烤得微焦，香氣散發出來了。",
+    2: "茶餅碾成了細粉。",
+    3: "用羅合篩出了均勻的茶粉。",
+    4: "水面冒出像魚眼的小泡，這是『一沸』。現在該做什麼呢？",
+    5: "一沸時加入了鹽。繼續加熱吧。",
+    6: "鍋邊的泡泡像泉水湧出、連成串珠，這是『二沸』。現在該做什麼呢？",
+    7: "取出一瓢水，把茶粉投入鍑中。繼續加熱吧。",
+    8: "水像波浪一樣翻騰，這是『三沸』。快！現在該做什麼？",
+    9: "把瓢裡的水倒回，止住沸騰，茶湯表面浮起了茶沫。",
+    10: "茶湯分入各碗，完成了！",
+  };
+
+  const DONE_AT_STEP = { zhi: 1, nian: 2, shai: 3, yan: 5, qushui: 7, daohui: 9, re: 9 };
+
+  const state = { step: 0, failed: false };
+
+  function reLabelForStep(step) {
+    if (step < 4) return "加熱（一沸）";
+    if (step < 6) return "加熱（二沸）";
+    return "加熱（三沸）";
+  }
+
+  function setDone(action) {
+    const btn = actionsEl.querySelector(`[data-action="${action}"]`);
+    if (btn) btn.classList.add("is-done");
+  }
+
+  function clearDone() {
+    actionsEl.querySelectorAll(".dc-action-btn").forEach((btn) => btn.classList.remove("is-done"));
+  }
+
+  function shakeScene() {
+    sceneWrap.classList.remove("is-shaking");
+    void sceneWrap.offsetWidth;
+    sceneWrap.classList.add("is-shaking");
+  }
+
+  function render() {
+    scene.setAttribute("data-step", String(state.step));
+
+    Object.keys(DONE_AT_STEP).forEach((key) => {
+      if (state.step >= DONE_AT_STEP[key]) setDone(key);
+    });
+    if (state.step >= 10) setDone("fencha");
+
+    actionsEl.querySelectorAll(".dc-action-btn").forEach((btn) => {
+      btn.disabled = state.failed || state.step >= 10;
+    });
+
+    reLabel.textContent = reLabelForStep(state.step);
+
+    const reBtn = actionsEl.querySelector('[data-action="re"]');
+    if (reBtn) {
+      reBtn.classList.toggle("is-pulsing", [3, 5, 7].includes(state.step) && !state.failed);
+    }
+
+    summaryEl.hidden = state.step < 10;
+    restartBtn.classList.toggle("is-alert", state.failed);
+  }
+
+  function showStatus(msg, isError) {
+    statusEl.textContent = msg;
+    statusEl.classList.toggle("is-error", !!isError);
+  }
+
+  function succeed(nextStep) {
+    state.step = nextStep;
+    showStatus(SUCCESS_MSG[nextStep], false);
+    render();
+  }
+
+  function fail(msg) {
+    showStatus(msg, true);
+    shakeScene();
+  }
+
+  function hardFail() {
+    state.failed = true;
+    showStatus("水煮過頭，變成『老水』，不能喝了！請按右上角「重新開始」再試一次。", true);
+    shakeScene();
+    render();
+  }
+
+  function handleAction(action) {
+    if (state.failed || state.step >= 10) return;
+    const step = state.step;
+
+    if (action === "zhi") {
+      if (step === 0) succeed(1);
+      return;
+    }
+    if (action === "nian") {
+      if (step === 1) succeed(2);
+      else if (step === 0) fail("茶餅還沒烤過，香氣出不來喔。");
+      return;
+    }
+    if (action === "shai") {
+      if (step === 2) succeed(3);
+      else if (step < 2) fail("茶餅還是一整塊，沒辦法篩。");
+      return;
+    }
+    if (action === "re") {
+      if (step === 3) { succeed(4); return; }
+      if (step === 5) { succeed(6); return; }
+      if (step === 7) { succeed(8); return; }
+      if (step < 3) { fail("茶粉還沒準備好，先把茶處理好吧。"); return; }
+      if (step === 4) { fail("已經一沸了，先加鹽吧。"); return; }
+      if (step === 6) { fail("已經二沸了，先取水投茶吧。"); return; }
+      if (step === 8) { hardFail(); return; }
+      return;
+    }
+    if (action === "yan") {
+      if (step === 4) succeed(5);
+      else fail("陸羽說要在一沸時加鹽喔。");
+      return;
+    }
+    if (action === "qushui") {
+      if (step === 6) succeed(7);
+      else fail("陸羽說要在二沸時取水、投入茶粉。");
+      return;
+    }
+    if (action === "daohui") {
+      if (step === 8) succeed(9);
+      else fail("還沒到三沸，不需要止沸。");
+      return;
+    }
+    if (action === "fencha") {
+      if (step === 9) succeed(10);
+      else fail("茶還沒煮好，先完成三沸吧。");
+      return;
+    }
+  }
+
+  function resetAll() {
+    state.step = 0;
+    state.failed = false;
+    clearDone();
+    showStatus(START_MSG, false);
+    render();
+  }
+
+  actionsEl.addEventListener("click", (event) => {
+    const btn = event.target.closest(".dc-action-btn");
+    if (!btn) return;
+    handleAction(btn.dataset.action);
+  });
+
+  restartBtn.addEventListener("click", resetAll);
+
+  showStatus(START_MSG, false);
+  render();
+}
+
+setupJianCha();
 
 if (window.location.hash) {
   applyRouteFromHash();
