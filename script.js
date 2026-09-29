@@ -40,6 +40,42 @@ try {
 }
 setSidebarCollapsed(storedSidebarCollapsed);
 
+/* ── Deep links ────────────────────────────────────────────────────
+   Every page gets its own URL (#tang/utensils, #song/process, #review, …)
+   so it can be opened directly, bookmarked, or shared — and back/forward
+   moves between the pages you've actually visited. */
+const VALID_SUBPAGES = ["reading", "utensils", "process"];
+
+function setRouteHash(dynasty, page) {
+  const hash = dynasty === "review" ? "#review" : `#${dynasty}/${page}`;
+  if (window.location.hash !== hash) {
+    history.pushState(null, "", hash);
+  }
+}
+
+function applyRouteFromHash({ pushHistory = false } = {}) {
+  const raw = window.location.hash.replace(/^#/, "");
+  const [dynasty, page] = raw.split("/");
+
+  if (dynasty === "review") {
+    activatePanel("review", { updateUrl: pushHistory });
+    return;
+  }
+
+  if (dynasty === "tang" || dynasty === "song") {
+    activatePanel(dynasty, { updateUrl: pushHistory });
+    if (page && page !== "reading" && VALID_SUBPAGES.includes(page)) {
+      const targetButton = document.querySelector(`.page-link[data-dynasty="${dynasty}"][data-page="${page}"]`);
+      if (targetButton) targetButton.click();
+    }
+    return;
+  }
+
+  activatePanel("tang", { updateUrl: pushHistory });
+}
+
+window.addEventListener("popstate", () => applyRouteFromHash());
+
 const progress = {
   tang: true,
   song: false,
@@ -91,7 +127,7 @@ function updateNextButtonLabel(dynasty, page) {
   }
 }
 
-function activatePanel(target) {
+function activatePanel(target, { updateUrl = true } = {}) {
   lessonPanels.forEach((panel) => {
     panel.classList.toggle("active", panel.id === `${target}-panel`);
   });
@@ -112,6 +148,8 @@ function activatePanel(target) {
     syncTimelineStates(target, firstPage);
     updateNextButtonLabel(target, firstPage);
   }
+
+  if (updateUrl) setRouteHash(target, firstPage);
 }
 
 pageButtons.forEach((button) => {
@@ -124,6 +162,7 @@ pageButtons.forEach((button) => {
 
     syncTimelineStates(dynasty, page);
     updateNextButtonLabel(dynasty, page);
+    setRouteHash(dynasty, page);
   });
 });
 
@@ -340,6 +379,10 @@ function setupTeaProcess(panelRoot) {
 if (tangPanel) setupTeaProcess(tangPanel);
 if (songPanel) setupTeaProcess(songPanel);
 
-const activePanelName = document.querySelector(".lesson-panel.active")?.id.replace("-panel", "") || "tang";
-activatePanel(activePanelName);
+if (window.location.hash) {
+  applyRouteFromHash();
+} else {
+  const activePanelName = document.querySelector(".lesson-panel.active")?.id.replace("-panel", "") || "tang";
+  activatePanel(activePanelName, { updateUrl: false });
+}
 updateProgress();
