@@ -333,12 +333,12 @@
               <div class="dc-scene-wrap" id="dcSceneWrap">
                 <svg class="dc-scene" id="dcScene" data-step="0" viewBox="0 0 440 360" role="img" aria-label="點茶示意圖">
                   <defs>
-                    <radialGradient id="dcBowlBodyGrad" cx="42%" cy="30%" r="75%">
+                    <radialGradient id="dcBowlBodyGrad" cx="42%" cy="25%" r="80%">
                       <stop offset="0%" stop-color="#453A31" />
                       <stop offset="55%" stop-color="#3C332C" />
                       <stop offset="100%" stop-color="#211C19" />
                     </radialGradient>
-                    <radialGradient id="dcInteriorGrad" cx="46%" cy="38%" r="70%">
+                    <radialGradient id="dcInteriorGrad" cx="46%" cy="35%" r="70%">
                       <stop offset="0%" stop-color="#463B30" />
                       <stop offset="70%" stop-color="#3C332C" />
                       <stop offset="100%" stop-color="#211C19" />
@@ -347,62 +347,69 @@
                       <stop offset="0%" stop-color="#93A15A" />
                       <stop offset="100%" stop-color="#59622F" />
                     </radialGradient>
-                    <clipPath id="dcBodyClip">
-                      <path d="M72,116 C58,190 86,264 174,298 L266,298 C354,264 382,190 368,116 A148,16 0 0 1 72,116 Z" />
+                    <clipPath id="dcGlazeClip">
+                      <path d="M72,108 C95,151 123,193 158,236 Q173,252 189,240 Q205,254 220,241 Q236,254 251,241 Q267,252 282,236 C317,193 345,151 368,108 A148,13 0 0 1 72,108 Z" />
                     </clipPath>
                     <clipPath id="dcInteriorClip">
-                      <ellipse cx="220" cy="118" rx="130" ry="23" />
+                      <ellipse cx="220" cy="111" rx="124" ry="18" />
                     </clipPath>
                   </defs>
 
-                  <ellipse cx="220" cy="322" rx="168" ry="16" fill="rgba(43,38,32,.18)" />
+                  <ellipse cx="220" cy="292" rx="62" ry="11" fill="rgba(43,38,32,.18)" />
 
-                  <path d="M72,116 C58,190 86,264 174,298 L266,298 C354,264 382,190 368,116 A148,16 0 0 1 72,116 Z"
+                  <!-- full body silhouette: unglazed clay-body base (斗笠形 — wide mouth, straight tapering sides
+                       close to an inverted triangle, only a slight outward bow, narrow waist) -->
+                  <path d="M72,108 C99,161 134,213 178,266 L262,266 C306,213 341,161 368,108 A148,13 0 0 1 72,108 Z"
+                        fill="#6B3F26" />
+
+                  <!-- solid clay foot ring (圈足): short, narrow, upper edge narrower than the flared base -->
+                  <path d="M178,266 L262,266 L272,283 L168,283 Z" fill="#5A3A22" />
+
+                  <!-- black glaze layer: stops short of the foot, irregular dripping lower edge exposes the clay body beneath (釉不及底) -->
+                  <path d="M72,108 C95,151 123,193 158,236 Q173,252 189,240 Q205,254 220,241 Q236,254 251,241 Q267,252 282,236 C317,193 345,151 368,108 A148,13 0 0 1 72,108 Z"
                         fill="url(#dcBowlBodyGrad)" />
 
-                  <g clip-path="url(#dcBodyClip)" opacity=".4">
-                    <path d="M120,132 C104,190 118,244 168,286" fill="none" stroke="#8C6635" stroke-width="2.4" stroke-linecap="round" />
-                    <path d="M162,128 C150,188 162,246 206,294" fill="none" stroke="#8C6635" stroke-width="1.6" stroke-linecap="round" opacity=".8" />
-                    <path d="M300,130 C314,190 300,246 250,290" fill="none" stroke="#8C6635" stroke-width="2" stroke-linecap="round" />
-                    <path d="M334,126 C348,182 332,240 282,286" fill="none" stroke="#8C6635" stroke-width="1.4" stroke-linecap="round" opacity=".7" />
+                  <g clip-path="url(#dcGlazeClip)" opacity=".4">
+                    <path d="M118,126 C138,168 158,202 182,228" fill="none" stroke="#8C6635" stroke-width="2.4" stroke-linecap="round" />
+                    <path d="M152,122 C168,162 182,196 202,220" fill="none" stroke="#8C6635" stroke-width="1.6" stroke-linecap="round" opacity=".8" />
+                    <path d="M302,124 C282,166 262,200 238,226" fill="none" stroke="#8C6635" stroke-width="2" stroke-linecap="round" />
+                    <path d="M336,120 C320,160 306,194 286,218" fill="none" stroke="#8C6635" stroke-width="1.4" stroke-linecap="round" opacity=".7" />
                   </g>
 
-                  <ellipse cx="220" cy="298" rx="47" ry="11" fill="none" stroke="#AD7248" stroke-width="3.2" opacity=".85" />
-
-                  <ellipse cx="220" cy="118" rx="148" ry="30" fill="url(#dcInteriorGrad)" />
+                  <ellipse cx="220" cy="108" rx="138" ry="22" fill="url(#dcInteriorGrad)" />
 
                   <g id="dcPileCoarse">
-                    <ellipse cx="86" cy="300" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
-                    <path d="M60,296 q6,-16 20,-14 q4,-12 18,-8 q10,-6 20,2 q10,-4 16,6 q-4,14 -18,14 q-2,8 -14,8 q-10,6 -22,0 q-14,2 -20,-8 Z"
+                    <ellipse cx="86" cy="284" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
+                    <path d="M60,280 q6,-16 20,-14 q4,-12 18,-8 q10,-6 20,2 q10,-4 16,6 q-4,14 -18,14 q-2,8 -14,8 q-10,6 -22,0 q-14,2 -20,-8 Z"
                           fill="#6B5334" />
-                    <circle cx="70" cy="292" r="2.6" fill="#5B4529" />
-                    <circle cx="82" cy="286" r="2.2" fill="#7A6140" />
-                    <circle cx="96" cy="290" r="2.8" fill="#5B4529" />
-                    <circle cx="108" cy="284" r="2.1" fill="#7A6140" />
-                    <circle cx="78" cy="298" r="2.3" fill="#7A6140" />
-                    <circle cx="100" cy="298" r="2.4" fill="#5B4529" />
+                    <circle cx="70" cy="276" r="2.6" fill="#5B4529" />
+                    <circle cx="82" cy="270" r="2.2" fill="#7A6140" />
+                    <circle cx="96" cy="274" r="2.8" fill="#5B4529" />
+                    <circle cx="108" cy="268" r="2.1" fill="#7A6140" />
+                    <circle cx="78" cy="282" r="2.3" fill="#7A6140" />
+                    <circle cx="100" cy="282" r="2.4" fill="#5B4529" />
                   </g>
 
                   <g id="dcPileFine">
-                    <ellipse cx="86" cy="300" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
-                    <path d="M58,298 q4,-18 24,-16 q6,-10 20,-6 q10,-8 22,0 q10,-2 14,8 q2,12 -14,14 q-4,8 -18,6 q-12,6 -26,0 q-16,0 -22,-6 Z"
+                    <ellipse cx="86" cy="284" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
+                    <path d="M58,282 q4,-18 24,-16 q6,-10 20,-6 q10,-8 22,0 q10,-2 14,8 q2,12 -14,14 q-4,8 -18,6 q-12,6 -26,0 q-16,0 -22,-6 Z"
                           fill="#9FAE5C" />
-                    <ellipse cx="86" cy="292" rx="26" ry="7" fill="#B4C171" opacity=".7" />
+                    <ellipse cx="86" cy="276" rx="26" ry="7" fill="#B4C171" opacity=".7" />
                   </g>
 
                   <g>
-                    <path class="dc-steam-wisp" d="M188,96 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
-                    <path class="dc-steam-wisp" d="M220,92 q10,-16 0,-30 q-10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
-                    <path class="dc-steam-wisp" d="M252,96 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                    <path class="dc-steam-wisp" d="M188,86 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                    <path class="dc-steam-wisp" d="M220,82 q10,-16 0,-30 q-10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                    <path class="dc-steam-wisp" d="M252,86 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
                   </g>
 
                   <g clip-path="url(#dcInteriorClip)">
-                    <ellipse id="dcPasteBlob" cx="220" cy="132" rx="36" ry="13" fill="#59622F" />
-                    <ellipse id="dcLiquid" cx="220" cy="120" rx="128" ry="22" fill="url(#dcTeaGrad)" />
+                    <ellipse id="dcPasteBlob" cx="220" cy="119" rx="32" ry="9" fill="#59622F" />
+                    <ellipse id="dcLiquid" cx="220" cy="111" rx="118" ry="16" fill="url(#dcTeaGrad)" />
                     <g id="dcFoamGroup"></g>
                   </g>
 
-                  <ellipse cx="220" cy="118" rx="148" ry="30" fill="none" stroke="#151210" stroke-width="2" opacity=".35" />
+                  <ellipse cx="220" cy="108" rx="138" ry="22" fill="none" stroke="#151210" stroke-width="2" opacity=".35" />
                 </svg>
               </div>
 

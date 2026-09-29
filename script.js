@@ -421,7 +421,7 @@ function setupDianCha() {
 
   function buildFoam() {
     const rand = seededRandom(88);
-    const cx = 220, cy = 118, rx = 122, ry = 19;
+    const cx = 220, cy = 111, rx = 112, ry = 15;
     const count = 34;
     for (let i = 0; i < count; i++) {
       const angle = rand() * Math.PI * 2;

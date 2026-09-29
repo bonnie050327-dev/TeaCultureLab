@@ -1080,7 +1080,7 @@ button { cursor: pointer; }
 
 #dcPasteBlob {
   opacity: 0;
-  transform-origin: 220px 132px;
+  transform-origin: 220px 119px;
   transform: scale(.6);
   transition: opacity 320ms ease, transform 320ms ease;
 }
