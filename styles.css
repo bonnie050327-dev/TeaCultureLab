@@ -1147,6 +1147,16 @@ button { cursor: pointer; }
   pointer-events: none;
 }
 
+/* Nudges the learner to keep whisking: glows once whisking starts, stops
+   the moment it's actually done (the .is-done checkmark takes over). */
+@keyframes dc-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent); background: var(--surface2); }
+  50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--accent) 28%, transparent); background: var(--accent-subtle); }
+}
+.dc-action-btn.is-pulsing {
+  animation: dc-glow 1.6s ease-in-out infinite;
+}
+
 .dc-check {
   display: inline-block;
   width: 0;

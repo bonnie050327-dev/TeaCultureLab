@@ -392,13 +392,15 @@ function setupDianCha() {
 
   if (!scene || !sceneWrap || !statusEl || !actionsEl || !summaryEl || !restartBtn || !foamGroup) return;
 
+  const START_MSG = "先從第一步開始吧！";
+
   const SUCCESS_MSG = {
     1: "團茶碾成了茶末。",
     2: "篩出了細緻的茶粉。",
     3: "茶碗溫熱了。",
     4: "茶粉調成了均勻的茶膏。",
-    5: "泡沫開始出現。",
-    6: "泡沫越來越多。",
+    5: "泡沫開始出現了，再注水攪打一次。",
+    6: "泡沫越來越多，再攪打一次就完成了！",
     7: "泡沫綿密潔白，完成了！",
   };
 
@@ -468,6 +470,13 @@ function setupDianCha() {
       btn.disabled = state.failed || state.step >= 7;
     });
 
+    // Whisk button glows once whisking has begun, to nudge the learner to
+    // keep clicking — stops the moment it's actually done (checkmark takes over).
+    const whiskBtn = actionsEl.querySelector('[data-action="whisk"]');
+    if (whiskBtn) {
+      whiskBtn.classList.toggle("is-pulsing", state.step >= 5 && state.step < 7 && !state.failed);
+    }
+
     summaryEl.hidden = state.step < 7;
     restartBtn.classList.toggle("is-alert", state.failed);
   }
@@ -532,7 +541,7 @@ function setupDianCha() {
     state.step = 0;
     state.failed = false;
     clearDone();
-    showStatus("", false);
+    showStatus(START_MSG, false);
     render();
   }
 
@@ -544,6 +553,7 @@ function setupDianCha() {
 
   restartBtn.addEventListener("click", resetAll);
 
+  showStatus(START_MSG, false);
   render();
 }
 
