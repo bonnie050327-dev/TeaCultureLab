@@ -684,26 +684,24 @@ button { cursor: pointer; }
   align-content: start;
 }
 
+/* No card chrome of its own — the tinted photo frame below is the only
+   visual border, so it reads as the card's outline. */
 .utensil-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm);
-  background: var(--surface1);
-  border: 1px solid var(--border-visible);
-  border-radius: var(--radius-component);
-  box-shadow: var(--shadow-1);
   font-family: var(--font-display);
   font-size: var(--text-body-sm);
   font-weight: 600;
   text-align: center;
   cursor: grab;
   user-select: none;
-  transition: transform 250ms ease-out, border-color 250ms ease-out;
+  transition: transform 250ms ease-out;
 }
 
-.utensil-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.utensil-card:hover { transform: translateY(-2px); }
 .utensil-card:active { cursor: grabbing; }
 .utensil-card.dragging { opacity: 0.5; }
 
@@ -717,9 +715,13 @@ button { cursor: pointer; }
   padding: var(--space-sm);
   border-radius: var(--radius-component);
   background: var(--accent-subtle);
+  box-shadow: 0 0 0 1px var(--border);
   object-fit: contain;
   object-position: center;
+  transition: box-shadow 200ms ease-out;
 }
+
+.utensil-card:hover .utensil-icon { box-shadow: 0 0 0 2px var(--accent); }
 
 .drop-slot {
   display: flex;
