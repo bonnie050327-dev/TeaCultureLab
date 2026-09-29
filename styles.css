@@ -664,19 +664,18 @@ button { cursor: pointer; }
 }
 
 /* ── Utensil matching game ─────────────────────────────────────────────
-   Photo grid on top (2 columns), matching explanations stacked below —
-   rather than the old side-by-side pool/answers layout — so each photo
-   can run much bigger. */
+   Photo pool (left, 2x2) and matching explanations (right) side by side. */
 .utensil-game {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
 }
 
 .game-pool {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  align-content: start;
 }
 
 .drop-zone-panel {
@@ -1091,12 +1090,11 @@ button { cursor: pointer; }
   .main-panel { padding: var(--space-lg) var(--space-lg) var(--space-4xl); }
 
   .review-grid,
+  .utensil-game,
   .process-scene { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
-  .game-pool { grid-template-columns: 1fr; }
-
   .panel-header {
     flex-direction: column;
     align-items: flex-start;
