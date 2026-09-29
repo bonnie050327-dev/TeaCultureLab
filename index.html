@@ -316,36 +316,110 @@
             <div class="lesson-block">
               <div class="block-heading">
                 <span>3</span>
-                <h3>泡茶流程</h3>
+                <h3>來點一碗宋茶</h3>
               </div>
 
-              <div class="process-scene">
-                <div class="tea-workbench">
-                  <div class="tea-leaf song-leaf" id="song-leaf" draggable="true">茶</div>
-                  <div class="kettle song-kettle" id="song-kettle"></div>
-                  <div class="brazier" id="song-brazier">火</div>
-                  <div class="whisk" id="song-whisk">筅</div>
-                  <div class="brew-bowl" id="song-bowl">碗</div>
-                </div>
+              <div class="dc-header-row">
+                <div class="answer-header">請依照正確步驟操作，完成一碗點茶。</div>
+                <button class="dc-restart" id="dcRestart" type="button" aria-label="重新開始">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M3 12a9 9 0 1 0 3-6.7" />
+                    <path d="M3 4v5h5" />
+                  </svg>
+                  重新開始
+                </button>
+              </div>
 
-                <div class="process-actions">
-                  <div class="process-task complete" data-step="1">
-                    <h4>1. 拖曳茶餅至暖壺處</h4>
-                    <p>將茶葉帶到準備區域。</p>
-                  </div>
-                  <div class="process-task" data-step="2">
-                    <h4>2. 點擊火爐開始加熱</h4>
-                    <p>以溫和火候控制茶水的溫度。</p>
-                  </div>
-                  <div class="process-task" data-step="3">
-                    <h4>3. 按住茶筅連續攪動</h4>
-                    <p>讓茶湯更為細緻順滑，帶出細泡。</p>
-                  </div>
-                  <div class="process-task" data-step="4">
-                    <h4>4. 滑動鼠標擦過茶碗</h4>
-                    <p>完成一杯細緻均勻的茶。</p>
-                  </div>
-                </div>
+              <div class="dc-scene-wrap" id="dcSceneWrap">
+                <svg class="dc-scene" id="dcScene" data-step="0" viewBox="0 0 440 360" role="img" aria-label="點茶示意圖">
+                  <defs>
+                    <radialGradient id="dcBowlBodyGrad" cx="42%" cy="30%" r="75%">
+                      <stop offset="0%" stop-color="#453A31" />
+                      <stop offset="55%" stop-color="#3C332C" />
+                      <stop offset="100%" stop-color="#211C19" />
+                    </radialGradient>
+                    <radialGradient id="dcInteriorGrad" cx="46%" cy="38%" r="70%">
+                      <stop offset="0%" stop-color="#463B30" />
+                      <stop offset="70%" stop-color="#3C332C" />
+                      <stop offset="100%" stop-color="#211C19" />
+                    </radialGradient>
+                    <radialGradient id="dcTeaGrad" cx="45%" cy="35%" r="70%">
+                      <stop offset="0%" stop-color="#93A15A" />
+                      <stop offset="100%" stop-color="#59622F" />
+                    </radialGradient>
+                    <clipPath id="dcBodyClip">
+                      <path d="M72,116 C58,190 86,264 174,298 L266,298 C354,264 382,190 368,116 A148,16 0 0 1 72,116 Z" />
+                    </clipPath>
+                    <clipPath id="dcInteriorClip">
+                      <ellipse cx="220" cy="118" rx="130" ry="23" />
+                    </clipPath>
+                  </defs>
+
+                  <ellipse cx="220" cy="322" rx="168" ry="16" fill="rgba(43,38,32,.18)" />
+
+                  <path d="M72,116 C58,190 86,264 174,298 L266,298 C354,264 382,190 368,116 A148,16 0 0 1 72,116 Z"
+                        fill="url(#dcBowlBodyGrad)" />
+
+                  <g clip-path="url(#dcBodyClip)" opacity=".4">
+                    <path d="M120,132 C104,190 118,244 168,286" fill="none" stroke="#8C6635" stroke-width="2.4" stroke-linecap="round" />
+                    <path d="M162,128 C150,188 162,246 206,294" fill="none" stroke="#8C6635" stroke-width="1.6" stroke-linecap="round" opacity=".8" />
+                    <path d="M300,130 C314,190 300,246 250,290" fill="none" stroke="#8C6635" stroke-width="2" stroke-linecap="round" />
+                    <path d="M334,126 C348,182 332,240 282,286" fill="none" stroke="#8C6635" stroke-width="1.4" stroke-linecap="round" opacity=".7" />
+                  </g>
+
+                  <ellipse cx="220" cy="298" rx="47" ry="11" fill="none" stroke="#AD7248" stroke-width="3.2" opacity=".85" />
+
+                  <ellipse cx="220" cy="118" rx="148" ry="30" fill="url(#dcInteriorGrad)" />
+
+                  <g id="dcPileCoarse">
+                    <ellipse cx="86" cy="300" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
+                    <path d="M60,296 q6,-16 20,-14 q4,-12 18,-8 q10,-6 20,2 q10,-4 16,6 q-4,14 -18,14 q-2,8 -14,8 q-10,6 -22,0 q-14,2 -20,-8 Z"
+                          fill="#6B5334" />
+                    <circle cx="70" cy="292" r="2.6" fill="#5B4529" />
+                    <circle cx="82" cy="286" r="2.2" fill="#7A6140" />
+                    <circle cx="96" cy="290" r="2.8" fill="#5B4529" />
+                    <circle cx="108" cy="284" r="2.1" fill="#7A6140" />
+                    <circle cx="78" cy="298" r="2.3" fill="#7A6140" />
+                    <circle cx="100" cy="298" r="2.4" fill="#5B4529" />
+                  </g>
+
+                  <g id="dcPileFine">
+                    <ellipse cx="86" cy="300" rx="34" ry="10" fill="rgba(43,38,32,.18)" />
+                    <path d="M58,298 q4,-18 24,-16 q6,-10 20,-6 q10,-8 22,0 q10,-2 14,8 q2,12 -14,14 q-4,8 -18,6 q-12,6 -26,0 q-16,0 -22,-6 Z"
+                          fill="#9FAE5C" />
+                    <ellipse cx="86" cy="292" rx="26" ry="7" fill="#B4C171" opacity=".7" />
+                  </g>
+
+                  <g>
+                    <path class="dc-steam-wisp" d="M188,96 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                    <path class="dc-steam-wisp" d="M220,92 q10,-16 0,-30 q-10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                    <path class="dc-steam-wisp" d="M252,96 q-10,-16 0,-30 q10,-14 0,-28" fill="none" stroke="#EDE6D3" stroke-width="4" stroke-linecap="round" opacity=".5" />
+                  </g>
+
+                  <g clip-path="url(#dcInteriorClip)">
+                    <ellipse id="dcPasteBlob" cx="220" cy="132" rx="36" ry="13" fill="#59622F" />
+                    <ellipse id="dcLiquid" cx="220" cy="120" rx="128" ry="22" fill="url(#dcTeaGrad)" />
+                    <g id="dcFoamGroup"></g>
+                  </g>
+
+                  <ellipse cx="220" cy="118" rx="148" ry="30" fill="none" stroke="#151210" stroke-width="2" opacity=".35" />
+                </svg>
+              </div>
+
+              <p class="dc-status" id="dcStatus" aria-live="polite"></p>
+
+              <div class="dc-actions" id="dcActions">
+                <button class="dc-action-btn" data-action="warm" type="button"><span class="dc-check">✓</span><span>溫碗</span></button>
+                <button class="dc-action-btn" data-action="whisk" type="button"><span class="dc-check">✓</span><span>少量注水攪打</span></button>
+                <button class="dc-action-btn" data-action="grind" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
+                <button class="dc-action-btn" data-action="dump" type="button"><span class="dc-check">✓</span><span>一次注滿熱水</span></button>
+                <button class="dc-action-btn" data-action="paste" type="button"><span class="dc-check">✓</span><span>調膏</span></button>
+                <button class="dc-action-btn" data-action="sift" type="button"><span class="dc-check">✓</span><span>篩粉</span></button>
+              </div>
+
+              <div class="dc-summary" id="dcSummary" hidden>
+                <h4>點茶小結</h4>
+                <p>點茶的每一步都在控制茶湯的狀態：溫碗讓茶保持溫度，調膏讓茶粉均勻，分次注水攪打才能打出綿密的泡沫。</p>
               </div>
             </div>
           </div>

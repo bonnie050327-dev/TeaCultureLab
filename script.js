@@ -377,7 +377,177 @@ function setupTeaProcess(panelRoot) {
 }
 
 if (tangPanel) setupTeaProcess(tangPanel);
-if (songPanel) setupTeaProcess(songPanel);
+// Song's 泡茶流程 page uses the dedicated 點茶 simulation (setupDianCha) below
+// instead of the drag/click workbench tang uses.
+
+/* ── 宋代點茶模擬 ──────────────────────────────────────────────────── */
+function setupDianCha() {
+  const scene = document.getElementById("dcScene");
+  const sceneWrap = document.getElementById("dcSceneWrap");
+  const statusEl = document.getElementById("dcStatus");
+  const actionsEl = document.getElementById("dcActions");
+  const summaryEl = document.getElementById("dcSummary");
+  const restartBtn = document.getElementById("dcRestart");
+  const foamGroup = document.getElementById("dcFoamGroup");
+
+  if (!scene || !sceneWrap || !statusEl || !actionsEl || !summaryEl || !restartBtn || !foamGroup) return;
+
+  const SUCCESS_MSG = {
+    1: "團茶碾成了茶末。",
+    2: "篩出了細緻的茶粉。",
+    3: "茶碗溫熱了。",
+    4: "茶粉調成了均勻的茶膏。",
+    5: "泡沫開始出現。",
+    6: "泡沫越來越多。",
+    7: "泡沫綿密潔白，完成了！",
+  };
+
+  const DONE_AT_STEP = { grind: 1, sift: 2, warm: 3, paste: 4 };
+
+  const state = { step: 0, failed: false };
+
+  // Deterministic pseudo-random bubble field, generated once on load.
+  function seededRandom(seed) {
+    let t = seed + 0x6d2b79f5;
+    return function () {
+      t += 0x6d2b79f5;
+      let r = Math.imul(t ^ (t >>> 15), 1 | t);
+      r = (r + Math.imul(r ^ (r >>> 7), 61 | r)) ^ r;
+      return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function buildFoam() {
+    const rand = seededRandom(88);
+    const cx = 220, cy = 118, rx = 122, ry = 19;
+    const count = 34;
+    for (let i = 0; i < count; i++) {
+      const angle = rand() * Math.PI * 2;
+      const radiusFactor = Math.sqrt(rand()) * 0.94;
+      const x = cx + Math.cos(angle) * rx * radiusFactor;
+      const y = cy + Math.sin(angle) * ry * radiusFactor;
+      const r = 3.4 + rand() * 3.6;
+      const stage = i < 11 ? "1" : i < 23 ? "2" : "3";
+      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      c.setAttribute("class", "dc-bubble");
+      c.setAttribute("data-stage", stage);
+      c.setAttribute("cx", x.toFixed(1));
+      c.setAttribute("cy", y.toFixed(1));
+      c.setAttribute("r", r.toFixed(1));
+      c.setAttribute("fill", "#F8F3E5");
+      c.setAttribute("opacity", (0.85 + rand() * 0.15).toFixed(2));
+      foamGroup.appendChild(c);
+    }
+  }
+  buildFoam();
+
+  function setDone(action) {
+    const btn = actionsEl.querySelector(`[data-action="${action}"]`);
+    if (btn) btn.classList.add("is-done");
+  }
+
+  function clearDone() {
+    actionsEl.querySelectorAll(".dc-action-btn").forEach((btn) => btn.classList.remove("is-done"));
+  }
+
+  function shakeScene() {
+    sceneWrap.classList.remove("is-shaking");
+    void sceneWrap.offsetWidth;
+    sceneWrap.classList.add("is-shaking");
+  }
+
+  function render() {
+    scene.setAttribute("data-step", String(state.step));
+
+    Object.keys(DONE_AT_STEP).forEach((key) => {
+      if (state.step >= DONE_AT_STEP[key]) setDone(key);
+    });
+    if (state.step >= 7) setDone("whisk");
+
+    actionsEl.querySelectorAll(".dc-action-btn").forEach((btn) => {
+      btn.disabled = state.failed || state.step >= 7;
+    });
+
+    summaryEl.hidden = state.step < 7;
+    restartBtn.classList.toggle("is-alert", state.failed);
+  }
+
+  function showStatus(msg, isError) {
+    statusEl.textContent = msg;
+    statusEl.classList.toggle("is-error", !!isError);
+  }
+
+  function succeed(nextStep) {
+    state.step = nextStep;
+    showStatus(SUCCESS_MSG[nextStep], false);
+    render();
+  }
+
+  function fail(msg) {
+    showStatus(msg, true);
+    shakeScene();
+  }
+
+  function hardFail() {
+    state.failed = true;
+    showStatus("水一次加太多，打不出泡沫了！宋人會分次注水。請按右上角「重新開始」再試一次。", true);
+    shakeScene();
+    render();
+  }
+
+  function handleAction(action) {
+    if (state.failed || state.step >= 7) return;
+    const step = state.step;
+
+    if (action === "dump") { hardFail(); return; }
+
+    if (action === "grind") {
+      if (step === 0) succeed(1);
+      return;
+    }
+    if (action === "sift") {
+      if (step === 1) succeed(2);
+      else if (step === 0) fail("還沒有茶末可以篩喔。");
+      return;
+    }
+    if (action === "warm") {
+      if (step === 2) succeed(3);
+      else if (step < 2) fail("茶粉還不夠細，先篩一篩吧。");
+      return;
+    }
+    if (action === "paste") {
+      if (step === 3) succeed(4);
+      else if (step === 2) fail("碗還是冷的，茶膏調不勻。");
+      else if (step < 2) fail("茶粉還不夠細，先篩一篩吧。");
+      return;
+    }
+    if (action === "whisk") {
+      if (step >= 4 && step < 7) succeed(step + 1);
+      else if (step < 4) fail("直接加水，茶粉會結塊。先調成茶膏吧。");
+      return;
+    }
+  }
+
+  function resetAll() {
+    state.step = 0;
+    state.failed = false;
+    clearDone();
+    showStatus("", false);
+    render();
+  }
+
+  actionsEl.addEventListener("click", (event) => {
+    const btn = event.target.closest(".dc-action-btn");
+    if (!btn) return;
+    handleAction(btn.dataset.action);
+  });
+
+  restartBtn.addEventListener("click", resetAll);
+
+  render();
+}
+
+setupDianCha();
 
 if (window.location.hash) {
   applyRouteFromHash();
