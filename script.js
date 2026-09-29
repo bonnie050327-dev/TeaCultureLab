@@ -1,4 +1,3 @@
-const stepOrder = ["tang", "song", "review"];
 const progressText = document.getElementById("progress-text");
 const progressFill = document.getElementById("progress-fill");
 const navButtons = document.querySelectorAll(".nav-step");
@@ -77,14 +76,28 @@ function applyRouteFromHash({ pushHistory = false } = {}) {
 window.addEventListener("popstate", () => applyRouteFromHash());
 
 const progress = {
-  tang: true,
+  tang: false,
   song: false,
   review: false,
 };
 
+// Tracks pages actually stepped through via "下一頁", per dynasty. Jumping
+// straight to a step by clicking the timeline never adds to this — only
+// progressing forward with the next-page button does — so the checkmark
+// only ever reflects real completion, not just "earlier in the list".
+const completedPages = { tang: new Set(), song: new Set() };
+
+// Each of tang's and song's 3 pages is worth 15% (6 × 15% = 90%); the
+// review page is worth the final 10%, reached once both dynasties are done.
+const PAGE_PROGRESS_WEIGHT = 15;
+const REVIEW_PROGRESS_WEIGHT = 10;
+
 function updateProgress() {
-  const completedCount = Object.values(progress).filter(Boolean).length;
-  const percent = Math.round((completedCount / stepOrder.length) * 100);
+  const percent = Math.min(
+    100,
+    (completedPages.tang.size + completedPages.song.size) * PAGE_PROGRESS_WEIGHT +
+      (progress.review ? REVIEW_PROGRESS_WEIGHT : 0)
+  );
   if (progressText) progressText.textContent = `${percent}%`;
   if (progressFill) progressFill.style.width = `${percent}%`;
 
@@ -93,12 +106,6 @@ function updateProgress() {
     button.classList.toggle("is-complete", !!progress[step]);
   });
 }
-
-// Tracks pages actually stepped through via "下一頁", per dynasty. Jumping
-// straight to a step by clicking the timeline never adds to this — only
-// progressing forward with the next-page button does — so the checkmark
-// only ever reflects real completion, not just "earlier in the list".
-const completedPages = { tang: new Set(), song: new Set() };
 
 function syncTimelineStates(targetDynasty = null, currentPage = null) {
   pageButtons.forEach((button) => {
@@ -197,6 +204,7 @@ contentNextButtons.forEach((button) => {
     if (currentIndex < pages.length - 1) {
       const nextPage = pages[currentIndex + 1];
       completedPages[dynasty]?.add(currentPage);
+      updateProgress();
       const targetButton = document.querySelector(`.page-link[data-dynasty="${dynasty}"][data-page="${nextPage}"]`);
       if (targetButton) {
         targetButton.click();
@@ -205,12 +213,14 @@ contentNextButtons.forEach((button) => {
     }
 
     if (dynasty === "tang") {
+      completedPages.tang?.add(currentPage);
       progress.tang = true;
       updateProgress();
       activatePanel("song");
     }
 
     if (dynasty === "song") {
+      completedPages.song?.add(currentPage);
       progress.song = true;
       progress.review = true;
       updateProgress();
