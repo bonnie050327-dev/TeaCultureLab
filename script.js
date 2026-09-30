@@ -632,11 +632,6 @@ function setupJianCha() {
 
     reLabel.textContent = reLabelForStep(state.step);
 
-    const reBtn = actionsEl.querySelector('[data-action="re"]');
-    if (reBtn) {
-      reBtn.classList.toggle("is-pulsing", [3, 5, 7].includes(state.step) && !state.failed);
-    }
-
     summaryEl.hidden = state.step < 10;
     restartBtn.classList.toggle("is-alert", state.failed);
     highlightNext(state.failed || state.step >= 10 ? -1 : state.step);

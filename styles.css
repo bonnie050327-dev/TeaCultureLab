@@ -1117,7 +1117,7 @@ button { cursor: pointer; }
    the learner see the order they actually built, not just a checklist. */
 .dc-slots {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+  grid-template-columns: repeat(var(--dc-slot-cols, auto-fit), minmax(56px, 1fr));
   gap: var(--space-sm);
   margin: var(--space-md) 0;
   padding: var(--space-sm);
