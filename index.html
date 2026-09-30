@@ -622,65 +622,86 @@
 
           <p class="answer-header">完成三個關卡，複習唐宋茶文化的生詞、語法和文化內容。</p>
 
-          <div class="rv-level lesson-block" id="rvLevel1">
-            <div class="rv-level-head">
-              <h2><span class="rv-level-num">第一關</span>生詞</h2>
-              <span class="rv-score" id="rvScore1" hidden></span>
-            </div>
-            <p class="rv-level-desc">選出最適合的詞，完成句子。</p>
-            <div class="rv-block" id="rvL1FillBlock"></div>
-            <div class="rv-block" id="rvL1ConfuseBlock"></div>
-            <div class="rv-tip" id="rvL1Tip" hidden></div>
+          <div class="page-switcher" aria-label="複習關卡">
+            <button class="page-link active" data-dynasty="review" data-page="l1" data-step="01">
+              <span class="timeline-label">生詞</span>
+            </button>
+            <button class="page-link" data-dynasty="review" data-page="l2" data-step="02" disabled>
+              <span class="timeline-label">語法</span>
+            </button>
+            <button class="page-link" data-dynasty="review" data-page="l3" data-step="03" disabled>
+              <span class="timeline-label">文化</span>
+            </button>
+            <button class="page-link" data-dynasty="review" data-page="compare" data-step="04" disabled>
+              <span class="timeline-label">比較卡</span>
+            </button>
           </div>
 
-          <div class="rv-level lesson-block" id="rvLevel2">
-            <div class="rv-level-head">
-              <h2><span class="rv-level-num">第二關</span>語法</h2>
-              <span class="rv-score" id="rvScore2" hidden></span>
-            </div>
-            <p class="rv-level-desc">用課堂上學過的句式完成題目。</p>
-            <p class="rv-locked-msg" id="rvLocked2">完成第一關後解鎖。</p>
-            <div id="rvL2Container" hidden></div>
-          </div>
-
-          <div class="rv-level lesson-block" id="rvLevel3">
-            <div class="rv-level-head">
-              <h2><span class="rv-level-num">第三關</span>文化｜唐、宋還是兩者？</h2>
-              <span class="rv-score" id="rvScore3" hidden></span>
-            </div>
-            <p class="rv-level-desc">這些做法屬於唐代、宋代，還是兩個時代都有？</p>
-            <p class="rv-locked-msg" id="rvLocked3">完成第二關後解鎖。</p>
-            <div class="rv-culture-grid" id="rvL3Grid" hidden></div>
-            <div class="rv-tip" id="rvL3Tip" hidden>唐宋茶文化雖然方法不同，但都以茶為媒介，追求內心的修養。</div>
-          </div>
-
-          <div class="rv-level lesson-block" id="rvCompareLevel">
-            <div class="rv-level-head"><h2>唐宋比較卡</h2></div>
-            <div class="rv-compare-cards">
-              <div class="rv-compare-card">
-                <h3>唐代</h3>
-                <p>順應自然、觀照內心，重視個人自省與天人秩序。</p>
+          <div class="dynasty-page active" data-dynasty="review" data-page="l1">
+            <div class="rv-level lesson-block" id="rvLevel1">
+              <div class="rv-level-head">
+                <h2><span class="rv-level-num">第一關</span>生詞</h2>
+                <span class="rv-score" id="rvScore1" hidden></span>
               </div>
-              <div class="rv-compare-card">
-                <h3>宋代</h3>
-                <p>講究精緻的生活美學，點茶成為文人的社交實踐。</p>
-              </div>
-            </div>
-            <div class="rv-open-practice">
-              <p class="rv-open-q">請用「不是…而是…」或「之所以…是因為…」寫一句話，比較唐代和宋代的茶文化。</p>
-              <textarea class="rv-open-input" id="rvOpenInput" rows="3" placeholder="請在這裡輸入你的句子…"></textarea>
-              <button class="rv-submit-btn" id="rvOpenSubmit" type="button">送出</button>
-              <div class="rv-open-answer" id="rvOpenAnswer" hidden>
-                <p><strong>參考答案 1：</strong>宋代飲茶之所以更講究美感，是因為經濟繁榮、城市生活發達。</p>
-                <p><strong>參考答案 2：</strong>宋代點茶不是把茶粉放進鍋中煮，而是直接在茶碗中沖泡。</p>
-              </div>
+              <p class="rv-level-desc">選出最適合的詞，完成句子。</p>
+              <div class="rv-block" id="rvL1FillBlock"></div>
+              <div class="rv-block" id="rvL1ConfuseBlock"></div>
+              <div class="rv-tip" id="rvL1Tip" hidden></div>
             </div>
           </div>
 
-          <div class="rv-final" id="rvFinal" hidden>
-            <h2>總分</h2>
-            <p class="rv-final-score" id="rvFinalScore"></p>
-            <p class="rv-final-msg" id="rvFinalMsg"></p>
+          <div class="dynasty-page" data-dynasty="review" data-page="l2">
+            <div class="rv-level lesson-block" id="rvLevel2">
+              <div class="rv-level-head">
+                <h2><span class="rv-level-num">第二關</span>語法</h2>
+                <span class="rv-score" id="rvScore2" hidden></span>
+              </div>
+              <p class="rv-level-desc">用課堂上學過的句式完成題目。</p>
+              <div id="rvL2Container"></div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="review" data-page="l3">
+            <div class="rv-level lesson-block" id="rvLevel3">
+              <div class="rv-level-head">
+                <h2><span class="rv-level-num">第三關</span>文化｜唐、宋還是兩者？</h2>
+                <span class="rv-score" id="rvScore3" hidden></span>
+              </div>
+              <p class="rv-level-desc">這些做法屬於唐代、宋代，還是兩個時代都有？</p>
+              <div class="rv-culture-grid" id="rvL3Grid"></div>
+              <div class="rv-tip" id="rvL3Tip" hidden>唐宋茶文化雖然方法不同，但都以茶為媒介，追求內心的修養。</div>
+            </div>
+          </div>
+
+          <div class="dynasty-page" data-dynasty="review" data-page="compare">
+            <div class="rv-level lesson-block" id="rvCompareLevel">
+              <div class="rv-level-head"><h2>唐宋比較卡</h2></div>
+              <div class="rv-compare-cards">
+                <div class="rv-compare-card">
+                  <h3>唐代</h3>
+                  <p>順應自然、觀照內心，重視個人自省與天人秩序。</p>
+                </div>
+                <div class="rv-compare-card">
+                  <h3>宋代</h3>
+                  <p>講究精緻的生活美學，點茶成為文人的社交實踐。</p>
+                </div>
+              </div>
+              <div class="rv-open-practice">
+                <p class="rv-open-q">請用「不是…而是…」或「之所以…是因為…」寫一句話，比較唐代和宋代的茶文化。</p>
+                <textarea class="rv-open-input" id="rvOpenInput" rows="3" placeholder="請在這裡輸入你的句子…"></textarea>
+                <button class="rv-submit-btn" id="rvOpenSubmit" type="button">送出</button>
+                <div class="rv-open-answer" id="rvOpenAnswer" hidden>
+                  <p><strong>參考答案 1：</strong>宋代飲茶之所以更講究美感，是因為經濟繁榮、城市生活發達。</p>
+                  <p><strong>參考答案 2：</strong>宋代點茶不是把茶粉放進鍋中煮，而是直接在茶碗中沖泡。</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="rv-final" id="rvFinal" hidden>
+              <h2>總分</h2>
+              <p class="rv-final-score" id="rvFinalScore"></p>
+              <p class="rv-final-msg" id="rvFinalMsg"></p>
+            </div>
           </div>
         </section>
       </main>

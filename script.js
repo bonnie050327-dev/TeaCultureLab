@@ -44,6 +44,7 @@ setSidebarCollapsed(storedSidebarCollapsed);
    so it can be opened directly, bookmarked, or shared — and back/forward
    moves between the pages you've actually visited. */
 const VALID_SUBPAGES = ["reading", "utensils", "process"];
+const REVIEW_SUBPAGES = ["l1", "l2", "l3", "compare"];
 
 function setRouteHash(dynasty, page) {
   const hash = dynasty === "review" ? "#review" : `#${dynasty}/${page}`;
@@ -58,6 +59,12 @@ function applyRouteFromHash({ pushHistory = false } = {}) {
 
   if (dynasty === "review") {
     activatePanel("review", { updateUrl: pushHistory });
+    if (page && page !== "l1" && REVIEW_SUBPAGES.includes(page)) {
+      // A locked tab is a disabled <button>, so clicking it is a silent no-op —
+      // deep-linking to a page you haven't unlocked just lands on 第一關 instead.
+      const targetButton = document.querySelector(`.page-link[data-dynasty="review"][data-page="${page}"]`);
+      if (targetButton) targetButton.click();
+    }
     return;
   }
 
@@ -144,14 +151,14 @@ function activatePanel(target, { updateUrl = true } = {}) {
     button.classList.toggle("active", isActive);
   });
 
-  const firstPage = target === "tang" ? "reading" : target === "song" ? "reading" : "review";
+  const firstPage = target === "tang" || target === "song" ? "reading" : target === "review" ? "l1" : null;
   const activePage = document.querySelector(`.dynasty-page[data-dynasty="${target}"][data-page="${firstPage}"]`);
   if (activePage) {
     dynastyPages.forEach((page) => page.classList.remove("active"));
     activePage.classList.add("active");
   }
 
-  if (target === "tang" || target === "song") {
+  if (target === "tang" || target === "song" || target === "review") {
     syncTimelineStates(target, firstPage);
     updateNextButtonLabel(target, firstPage);
   }
@@ -756,8 +763,6 @@ function setupReview() {
   const l2Container = document.getElementById("rvL2Container");
   const l3Grid = document.getElementById("rvL3Grid");
   const l3Tip = document.getElementById("rvL3Tip");
-  const locked2 = document.getElementById("rvLocked2");
-  const locked3 = document.getElementById("rvLocked3");
   const finalEl = document.getElementById("rvFinal");
   const finalScoreEl = document.getElementById("rvFinalScore");
   const finalMsgEl = document.getElementById("rvFinalMsg");
@@ -769,11 +774,20 @@ function setupReview() {
     l2: document.getElementById("rvScore2"),
     l3: document.getElementById("rvScore3"),
   };
+  // Each level's tab (page-link) is a disabled <button> until the previous
+  // level is fully resolved — a locked tab simply can't be clicked, so no
+  // extra guard is needed in the pageButtons click handler itself.
+  const reviewTabs = {
+    l2: document.querySelector('.page-link[data-dynasty="review"][data-page="l2"]'),
+    l3: document.querySelector('.page-link[data-dynasty="review"][data-page="l3"]'),
+    compare: document.querySelector('.page-link[data-dynasty="review"][data-page="compare"]'),
+  };
 
   if (
     !restartBtn || !l1FillBlock || !l1ConfuseBlock || !l1Tip || !l2Container ||
-    !l3Grid || !l3Tip || !locked2 || !locked3 || !finalEl || !finalScoreEl || !finalMsgEl ||
-    !openInput || !openSubmit || !openAnswer
+    !l3Grid || !l3Tip || !finalEl || !finalScoreEl || !finalMsgEl ||
+    !openInput || !openSubmit || !openAnswer ||
+    !reviewTabs.l2 || !reviewTabs.l3 || !reviewTabs.compare
   ) return;
 
   /* ── Data ──────────────────────────────────────────────────────────── */
@@ -894,15 +908,12 @@ function setupReview() {
         el.hidden = false;
         el.textContent = `${score[levelKey]} / ${TOTALS[levelKey]}`;
       }
-      if (levelKey === "l1") {
-        locked2.hidden = true;
-        l2Container.hidden = false;
+      if (levelKey === "l1") reviewTabs.l2.disabled = false;
+      if (levelKey === "l2") reviewTabs.l3.disabled = false;
+      if (levelKey === "l3") {
+        l3Tip.hidden = false;
+        reviewTabs.compare.disabled = false;
       }
-      if (levelKey === "l2") {
-        locked3.hidden = true;
-        l3Grid.hidden = false;
-      }
-      if (levelKey === "l3") l3Tip.hidden = false;
       maybeShowFinal();
     }
   }
@@ -1420,10 +1431,9 @@ function setupReview() {
     l1Tip.hidden = true;
     l3Tip.hidden = true;
     finalEl.hidden = true;
-    locked2.hidden = false;
-    locked3.hidden = false;
-    l2Container.hidden = true;
-    l3Grid.hidden = true;
+    reviewTabs.l2.disabled = true;
+    reviewTabs.l3.disabled = true;
+    reviewTabs.compare.disabled = true;
     openAnswer.hidden = true;
     openInput.value = "";
 
@@ -1488,7 +1498,13 @@ function setupReview() {
     shuffle(L3_CARDS).forEach((item) => renderCultureCard(l3Grid, item));
   }
 
-  restartBtn.addEventListener("click", build);
+  restartBtn.addEventListener("click", () => {
+    build();
+    // Only jump back to 第一關 on an explicit restart — the initial build()
+    // call must NOT force-navigate, or every page load would hijack
+    // whichever panel/hash the visitor actually landed on.
+    activatePanel("review");
+  });
   openSubmit.addEventListener("click", () => { openAnswer.hidden = false; });
 
   build();

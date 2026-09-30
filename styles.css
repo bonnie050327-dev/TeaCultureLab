@@ -500,6 +500,11 @@ button { cursor: pointer; }
 
 .timeline-cta:hover .timeline-label { color: var(--accent); }
 
+.page-link:disabled {
+  cursor: not-allowed;
+  opacity: .4;
+}
+
 .content-next-button {
   position: fixed;
   right: var(--space-xl);
