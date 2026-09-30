@@ -1135,17 +1135,6 @@ button { cursor: pointer; }
   color: var(--accent);
 }
 
-.rv-score {
-  flex-shrink: 0;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  font-weight: 600;
-}
-
 .rv-level-desc {
   margin-bottom: var(--space-lg);
   color: var(--text2);

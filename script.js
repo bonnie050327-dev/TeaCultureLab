@@ -128,15 +128,25 @@ function syncTimelineStates(targetDynasty = null, currentPage = null) {
 const nextButtonLabels = {
   tang: { reading: "下一頁", utensils: "下一頁", process: "前往宋代" },
   song: { reading: "下一頁", utensils: "下一頁", process: "下一頁" },
+  review: { l1: "下一頁", l2: "下一頁", l3: "下一頁" },
+};
+
+const PAGES_BY_DYNASTY = {
+  tang: VALID_SUBPAGES,
+  song: VALID_SUBPAGES,
+  review: REVIEW_SUBPAGES,
 };
 
 function updateNextButtonLabel(dynasty, page) {
   const button = document.querySelector(`.content-next-button[data-dynasty="${dynasty}"]`);
-  const label = button ? button.querySelector(".content-next-label") : null;
+  if (!button) return;
+  const label = button.querySelector(".content-next-label");
   const map = nextButtonLabels[dynasty];
   if (label && map && map[page]) {
     label.textContent = map[page];
   }
+  // 比較卡 is review's last page and has no next-button of its own.
+  button.hidden = dynasty === "review" && page === "compare";
 }
 
 function activatePanel(target, { updateUrl = true } = {}) {
@@ -201,15 +211,19 @@ nextButtons.forEach((button) => {
 contentNextButtons.forEach((button) => {
   button.addEventListener("click", () => {
     const dynasty = button.dataset.dynasty;
-    const pages = ["reading", "utensils", "process"];
+    const pages = PAGES_BY_DYNASTY[dynasty] || VALID_SUBPAGES;
     const active = document.querySelector(`.dynasty-page.active[data-dynasty="${dynasty}"]`);
-    const currentPage = active ? active.dataset.page : "reading";
+    const currentPage = active ? active.dataset.page : pages[0];
     const currentIndex = pages.indexOf(currentPage);
 
     if (currentIndex < pages.length - 1) {
       const nextPage = pages[currentIndex + 1];
-      completedPages[dynasty]?.add(currentPage);
-      updateProgress();
+      // Review's checkmarks track quiz completion, not "clicked past this
+      // page" — so unlike tang/song, next-page here doesn't mark it done.
+      if (dynasty !== "review") {
+        completedPages[dynasty]?.add(currentPage);
+        updateProgress();
+      }
       const targetButton = document.querySelector(`.page-link[data-dynasty="${dynasty}"][data-page="${nextPage}"]`);
       if (targetButton) {
         targetButton.click();
@@ -767,11 +781,6 @@ function setupReview() {
   const openInput = document.getElementById("rvOpenInput");
   const openSubmit = document.getElementById("rvOpenSubmit");
   const openAnswer = document.getElementById("rvOpenAnswer");
-  const scoreEls = {
-    l1: document.getElementById("rvScore1"),
-    l2: document.getElementById("rvScore2"),
-    l3: document.getElementById("rvScore3"),
-  };
   // Levels are freely clickable in any order, like the Tang/Song timelines —
   // reviewTabs is just kept around to mark each one "done" (checkmark) once
   // its questions are all resolved.
@@ -809,6 +818,26 @@ function setupReview() {
     { sentence: "知道道理還不夠，還要在生活中＿＿。", answer: "實踐" },
   ];
   const L1_TIP = "體悟：心裡真正明白。體現：把特點表現出來。實踐：實際去做。";
+  // Shown when the learner picks the wrong word — the hint is that word's
+  // own meaning, so they can judge for themselves why it doesn't fit here.
+  const L1_DEFINITIONS = {
+    繁榮: "經濟、社會等發展得很好、很興盛。",
+    擴散: "向四周散開，範圍越來越大。",
+    核心: "最重要、最中心的部分。",
+    納入: "把某事物放進某個範圍或系統裡。",
+    擺脫: "脫離、甩開不好的狀態或束縛。",
+    媒介: "使雙方發生關係的中間人或事物。",
+    攪打: "用工具快速攪動，使產生變化。",
+    流傳: "（事物、故事等）一直傳下來，繼續存在。",
+    調控: "調整並控制，使達到需要的狀態。",
+    提倡: "鼓勵大家去做某件事。",
+    精緻: "做得很精細、很講究。",
+    秩序: "有條理、不混亂的狀態。",
+    境界: "事物所達到的程度或層次。",
+    體悟: "心裡真正明白、領會到。",
+    體現: "把某種特點或精神表現出來。",
+    實踐: "實際去做，落實在行動上。",
+  };
 
   const L2_REORDER = {
     title: "1. 對（於）…而言｜句子重組",
@@ -857,7 +886,6 @@ function setupReview() {
       answerIndex: 1,
     },
   ];
-  const L2_REWRITE_HINT = "「之所以」後面接結果，「是因為」後面接原因。";
 
   const L2_SELECT = {
     sentence: "宋代點茶不是把茶粉投入鍋中煮，而是＿＿。",
@@ -902,11 +930,6 @@ function setupReview() {
     resolved[levelKey] += 1;
     if (correct) score[levelKey] += 1;
     if (resolved[levelKey] >= TOTALS[levelKey]) {
-      const el = scoreEls[levelKey];
-      if (el) {
-        el.hidden = false;
-        el.textContent = `${score[levelKey]} / ${TOTALS[levelKey]}`;
-      }
       if (levelKey === "l3") l3Tip.hidden = false;
       completedPages.review.add(levelKey);
       const activeReviewPage = document.querySelector('.dynasty-page.active[data-dynasty="review"]');
@@ -932,6 +955,10 @@ function setupReview() {
      Used by L1's fill-in-blank, L1's confusable-word set, and L2's
      rewrite-choice / select-choice patterns — they're all "one prompt,
      pick the right option" underneath. */
+  // First wrong attempt only shows a hint (correctAnswer stays hidden) with a
+  // 再試一次 button; the answer is only revealed on the second wrong attempt.
+  // wrongHint may be a string, or a function(selectedOption) => string when
+  // the hint depends on which option the learner picked (used by 生詞).
   function renderMCQuestion(container, { numberLabel, promptHtml, options, correctAnswer, levelKey, wrongHint, onResolved }) {
     const card = document.createElement("div");
     card.className = "rv-question";
@@ -951,6 +978,7 @@ function setupReview() {
     const feedbackEl = card.querySelector(".rv-feedback");
     let firstDone = false;
     let solved = false;
+    let wrongAttempts = 0;
 
     function reset() {
       optionsEl.querySelectorAll("button").forEach((b) => {
@@ -981,14 +1009,16 @@ function setupReview() {
           btn.classList.add("is-correct");
           feedbackEl.className = "rv-feedback is-correct";
           feedbackEl.textContent = "✓ 答對了！";
-        } else {
-          btn.classList.add("is-wrong");
-          optionsEl.querySelectorAll("button").forEach((b) => {
-            if (b.textContent === correctAnswer) b.classList.add("is-correct");
-          });
-          feedbackEl.className = "rv-feedback is-wrong";
+          return;
+        }
+        wrongAttempts += 1;
+        btn.classList.add("is-wrong");
+        feedbackEl.className = "rv-feedback is-wrong";
+        feedbackEl.innerHTML = "";
+        const hintText = typeof wrongHint === "function" ? wrongHint(opt) : wrongHint;
+        if (wrongAttempts === 1) {
           const msg = document.createElement("span");
-          msg.textContent = `✗ 正確答案是「${correctAnswer}」${wrongHint ? "　" + wrongHint : ""}`;
+          msg.textContent = `✗ 再想想。${hintText || ""}`;
           feedbackEl.appendChild(msg);
           const retry = document.createElement("button");
           retry.type = "button";
@@ -996,6 +1026,13 @@ function setupReview() {
           retry.textContent = "再試一次";
           retry.addEventListener("click", reset);
           feedbackEl.appendChild(retry);
+        } else {
+          optionsEl.querySelectorAll("button").forEach((b) => {
+            if (b.textContent === correctAnswer) b.classList.add("is-correct");
+          });
+          const msg = document.createElement("span");
+          msg.textContent = `✗ 正確答案是「${correctAnswer}」`;
+          feedbackEl.appendChild(msg);
         }
       });
       optionsEl.appendChild(btn);
@@ -1110,6 +1147,8 @@ function setupReview() {
       renderAnswer();
     }
 
+    let wrongAttempts = 0;
+
     checkBtn.addEventListener("click", () => {
       const correct = slots.every((c, i) => c === L2_REORDER.answer[i]);
       if (!firstDone) {
@@ -1123,11 +1162,14 @@ function setupReview() {
         renderAll();
         feedbackEl.className = "rv-feedback is-correct";
         feedbackEl.textContent = "✓ 答對了！";
-      } else {
-        feedbackEl.className = "rv-feedback is-wrong";
-        feedbackEl.innerHTML = "";
+        return;
+      }
+      wrongAttempts += 1;
+      feedbackEl.className = "rv-feedback is-wrong";
+      feedbackEl.innerHTML = "";
+      if (wrongAttempts === 1) {
         const msg = document.createElement("span");
-        msg.textContent = `✗ 正確答案是「${L2_REORDER.answer.join("")}」`;
+        msg.textContent = `✗ 再想想。${L2_REORDER.explain}`;
         feedbackEl.appendChild(msg);
         const retry = document.createElement("button");
         retry.type = "button";
@@ -1140,6 +1182,13 @@ function setupReview() {
           feedbackEl.innerHTML = "";
         });
         feedbackEl.appendChild(retry);
+      } else {
+        solved = true;
+        checkBtn.disabled = true;
+        renderAll();
+        const msg = document.createElement("span");
+        msg.textContent = `✗ 正確答案是「${L2_REORDER.answer.join("")}」`;
+        feedbackEl.appendChild(msg);
       }
     });
 
@@ -1434,6 +1483,7 @@ function setupReview() {
     const optsEl = card.querySelector(".rv-culture-options");
     let firstDone = false;
     let solved = false;
+    let wrongAttempts = 0;
 
     ["唐代", "宋代", "兩者"].forEach((label) => {
       const btn = document.createElement("button");
@@ -1453,24 +1503,32 @@ function setupReview() {
           btn.classList.add("is-correct");
           return;
         }
+        wrongAttempts += 1;
         btn.classList.add("is-wrong");
-        optsEl.querySelectorAll("button").forEach((b) => {
-          if (b.textContent === item.answer) b.classList.add("is-correct");
-        });
         const feedbackEl = document.createElement("div");
         feedbackEl.className = "rv-feedback is-wrong";
-        const msg = document.createElement("span");
-        msg.textContent = `✗ 正確答案是「${item.answer}」`;
-        feedbackEl.appendChild(msg);
-        const retry = document.createElement("button");
-        retry.type = "button";
-        retry.className = "rv-retry-btn";
-        retry.textContent = "再試一次";
-        retry.addEventListener("click", () => {
-          optsEl.querySelectorAll("button").forEach((b) => { b.disabled = false; b.classList.remove("is-correct", "is-wrong"); });
-          feedbackEl.remove();
-        });
-        feedbackEl.appendChild(retry);
+        if (wrongAttempts === 1) {
+          const msg = document.createElement("span");
+          msg.textContent = "✗ 再想想，這個做法是唐代、宋代，還是兩個時代都有？";
+          feedbackEl.appendChild(msg);
+          const retry = document.createElement("button");
+          retry.type = "button";
+          retry.className = "rv-retry-btn";
+          retry.textContent = "再試一次";
+          retry.addEventListener("click", () => {
+            optsEl.querySelectorAll("button").forEach((b) => { b.disabled = false; b.classList.remove("is-correct", "is-wrong"); });
+            feedbackEl.remove();
+          });
+          feedbackEl.appendChild(retry);
+        } else {
+          solved = true;
+          optsEl.querySelectorAll("button").forEach((b) => {
+            if (b.textContent === item.answer) b.classList.add("is-correct");
+          });
+          const msg = document.createElement("span");
+          msg.textContent = `✗ 正確答案是「${item.answer}」`;
+          feedbackEl.appendChild(msg);
+        }
         card.appendChild(feedbackEl);
       });
       optsEl.appendChild(btn);
@@ -1483,9 +1541,6 @@ function setupReview() {
   function build() {
     score.l1 = 0; score.l2 = 0; score.l3 = 0;
     resolved.l1 = 0; resolved.l2 = 0; resolved.l3 = 0;
-    scoreEls.l1.hidden = true;
-    scoreEls.l2.hidden = true;
-    scoreEls.l3.hidden = true;
     l1Tip.hidden = true;
     l3Tip.hidden = true;
     finalEl.hidden = true;
@@ -1517,6 +1572,7 @@ function setupReview() {
         options,
         correctAnswer: q.answer,
         levelKey: "l1",
+        wrongHint: (picked) => (L1_DEFINITIONS[picked] ? `「${picked}」：${L1_DEFINITIONS[picked]}` : ""),
         onResolved: q.kind === "confuse" ? () => {
           confuseDone += 1;
           if (confuseDone === selectedConfuseCount) {
@@ -1531,7 +1587,8 @@ function setupReview() {
     renderPattern(l2Container, L2_REORDER.title, L2_REORDER.explain, renderReorder);
     renderPattern(l2Container, "2. 以…為…｜詞卡填空", "用來表達「把某人或某事物當作……」。", renderWordbankFill);
     renderPattern(l2Container, L2_MATCH.title, L2_MATCH.explain, renderMatching);
-    renderPattern(l2Container, "4. （之）所以…是因為…｜選出正確的改寫", "用來說明某個結果或現象的原因。", (b) => {
+    const L2_REWRITE_EXPLAIN = "用來說明某個結果或現象的原因。";
+    renderPattern(l2Container, "4. （之）所以…是因為…｜選出正確的改寫", L2_REWRITE_EXPLAIN, (b) => {
       L2_REWRITE.forEach((q, qi) => {
         renderMCQuestion(b, {
           numberLabel: `第 ${qi + 1} 題`,
@@ -1539,7 +1596,7 @@ function setupReview() {
           options: q.options,
           correctAnswer: q.options[q.answerIndex],
           levelKey: "l2",
-          wrongHint: L2_REWRITE_HINT,
+          wrongHint: L2_REWRITE_EXPLAIN,
         });
       });
     });
