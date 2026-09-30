@@ -1025,6 +1025,7 @@ function setupReview() {
   /* ── 2.1 Sentence reorder ──────────────────────────────────────────── */
   function renderReorder(body) {
     body.innerHTML = `
+      <div class="answer-header">請把下方的詞拖到框裡，排出正確的句子。</div>
       <div class="rv-answer-row"></div>
       <div class="rv-chunk-pool"></div>
       <button class="rv-check-btn" type="button" disabled>檢查</button>
@@ -1035,9 +1036,18 @@ function setupReview() {
     const checkBtn = body.querySelector(".rv-check-btn");
     const feedbackEl = body.querySelector(".rv-feedback");
     const chunks = shuffle(L2_REORDER.chunks);
-    let picked = [];
+    const slots = new Array(L2_REORDER.answer.length).fill(null);
     let firstDone = false;
     let solved = false;
+
+    function isUsed(c) { return slots.includes(c); }
+    function firstEmptyIndex() { return slots.findIndex((s) => s === null); }
+
+    function placeInSlot(index, word) {
+      if (solved || index < 0 || isUsed(word)) return;
+      slots[index] = word;
+      renderAll();
+    }
 
     function renderChunks() {
       pool.innerHTML = "";
@@ -1046,12 +1056,18 @@ function setupReview() {
         btn.type = "button";
         btn.className = "rv-chunk";
         btn.textContent = c;
-        if (picked.includes(c)) btn.classList.add("is-used");
+        if (isUsed(c)) btn.classList.add("is-used");
+        btn.draggable = !solved && !isUsed(c);
+        btn.addEventListener("dragstart", (event) => {
+          if (solved || isUsed(c)) { event.preventDefault(); return; }
+          event.dataTransfer.setData("text/plain", c);
+          event.dataTransfer.effectAllowed = "move";
+          btn.classList.add("dragging");
+        });
+        btn.addEventListener("dragend", () => btn.classList.remove("dragging"));
         btn.addEventListener("click", () => {
-          if (solved || picked.includes(c)) return;
-          picked.push(c);
-          renderChunks();
-          renderAnswer();
+          if (solved || isUsed(c)) return;
+          placeInSlot(firstEmptyIndex(), c);
         });
         pool.appendChild(btn);
       });
@@ -1059,24 +1075,43 @@ function setupReview() {
 
     function renderAnswer() {
       answerRow.innerHTML = "";
-      picked.forEach((c, i) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "rv-chunk";
-        btn.textContent = c;
-        btn.addEventListener("click", () => {
+      slots.forEach((word, i) => {
+        const slot = document.createElement(word ? "button" : "div");
+        slot.className = word ? "rv-chunk" : "rv-slot";
+        if (word) {
+          slot.type = "button";
+          slot.textContent = word;
+          slot.addEventListener("click", () => {
+            if (solved) return;
+            slots[i] = null;
+            renderAll();
+          });
+        }
+        slot.addEventListener("dragover", (event) => {
           if (solved) return;
-          picked.splice(i, 1);
-          renderChunks();
-          renderAnswer();
+          event.preventDefault();
+          slot.classList.add("is-drag-over");
         });
-        answerRow.appendChild(btn);
+        slot.addEventListener("dragleave", () => slot.classList.remove("is-drag-over"));
+        slot.addEventListener("drop", (event) => {
+          event.preventDefault();
+          slot.classList.remove("is-drag-over");
+          if (solved) return;
+          const dropped = event.dataTransfer.getData("text/plain");
+          if (dropped) placeInSlot(i, dropped);
+        });
+        answerRow.appendChild(slot);
       });
-      checkBtn.disabled = picked.length !== L2_REORDER.answer.length;
+      checkBtn.disabled = slots.some((s) => s === null);
+    }
+
+    function renderAll() {
+      renderChunks();
+      renderAnswer();
     }
 
     checkBtn.addEventListener("click", () => {
-      const correct = picked.length === L2_REORDER.answer.length && picked.every((c, i) => c === L2_REORDER.answer[i]);
+      const correct = slots.every((c, i) => c === L2_REORDER.answer[i]);
       if (!firstDone) {
         firstDone = true;
         recordFirstAttempt("l2", correct);
@@ -1085,6 +1120,7 @@ function setupReview() {
       if (correct) {
         solved = true;
         checkBtn.disabled = true;
+        renderAll();
         feedbackEl.className = "rv-feedback is-correct";
         feedbackEl.textContent = "✓ 答對了！";
       } else {
@@ -1098,9 +1134,8 @@ function setupReview() {
         retry.className = "rv-retry-btn";
         retry.textContent = "再試一次";
         retry.addEventListener("click", () => {
-          picked = [];
-          renderChunks();
-          renderAnswer();
+          slots.fill(null);
+          renderAll();
           feedbackEl.hidden = true;
           feedbackEl.innerHTML = "";
         });
@@ -1108,13 +1143,13 @@ function setupReview() {
       }
     });
 
-    renderChunks();
-    renderAnswer();
+    renderAll();
   }
 
   /* ── 2.2 Word-bank fill ────────────────────────────────────────────── */
   function renderWordbankFill(body) {
     body.innerHTML = `
+      <div class="answer-header">請把下方的詞拖到空格裡。</div>
       <div class="rv-wordbank"></div>
       <div class="rv-fill-questions"></div>
       <button class="rv-check-btn" type="button" disabled>檢查</button>
@@ -1136,6 +1171,13 @@ function setupReview() {
       return filled.some((arr) => arr.includes(w));
     }
 
+    function placeWord(qi, bi, w) {
+      if (solved || locked[qi] || isWordUsed(w)) return;
+      filled[qi][bi] = w;
+      activeSlot = null;
+      renderAll();
+    }
+
     function evaluate(qi) {
       const q = L2_FILL_QUESTIONS[qi];
       const given = filled[qi];
@@ -1152,11 +1194,17 @@ function setupReview() {
         btn.className = "rv-bank-word";
         btn.textContent = w;
         if (isWordUsed(w)) btn.classList.add("is-used");
+        btn.draggable = !solved && !isWordUsed(w);
+        btn.addEventListener("dragstart", (event) => {
+          if (solved || isWordUsed(w)) { event.preventDefault(); return; }
+          event.dataTransfer.setData("text/plain", w);
+          event.dataTransfer.effectAllowed = "move";
+          btn.classList.add("dragging");
+        });
+        btn.addEventListener("dragend", () => btn.classList.remove("dragging"));
         btn.addEventListener("click", () => {
           if (solved || isWordUsed(w) || !activeSlot) return;
-          filled[activeSlot.qi][activeSlot.bi] = w;
-          activeSlot = null;
-          renderAll();
+          placeWord(activeSlot.qi, activeSlot.bi, w);
         });
         bankEl.appendChild(btn);
       });
@@ -1196,6 +1244,19 @@ function setupReview() {
                 activeSlot = { qi, bi: idx };
               }
               renderAll();
+            });
+            slot.addEventListener("dragover", (event) => {
+              if (solved || locked[qi]) return;
+              event.preventDefault();
+              slot.classList.add("is-drag-over");
+            });
+            slot.addEventListener("dragleave", () => slot.classList.remove("is-drag-over"));
+            slot.addEventListener("drop", (event) => {
+              event.preventDefault();
+              slot.classList.remove("is-drag-over");
+              if (solved || locked[qi]) return;
+              const dropped = event.dataTransfer.getData("text/plain");
+              if (dropped) placeWord(qi, idx, dropped);
             });
             p.appendChild(slot);
           }

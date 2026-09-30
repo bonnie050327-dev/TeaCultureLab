@@ -1337,7 +1337,6 @@ button { cursor: pointer; }
   min-height: 46px;
   padding: var(--space-sm);
   margin-bottom: var(--space-md);
-  border: 1.5px dashed var(--border-visible);
   border-radius: var(--radius-control);
   background: var(--surface2);
 }
@@ -1362,8 +1361,19 @@ button { cursor: pointer; }
 }
 .rv-chunk:hover { transform: translateY(-1px); }
 .rv-chunk.is-used { opacity: .35; pointer-events: none; }
+.rv-chunk.dragging { opacity: .35; }
 
 .rv-answer-row .rv-chunk { background: var(--surface1); border: 1.5px solid var(--accent); }
+
+.rv-slot {
+  min-width: 64px;
+  min-height: 34px;
+  border: 1.5px dashed var(--border-visible);
+  border-radius: var(--radius-control);
+  background: var(--surface1);
+  transition: border-color 150ms ease, background 150ms ease;
+}
+.rv-slot.is-drag-over { border-color: var(--accent); background: var(--accent-subtle); }
 
 /* Wordbank fill (2.2) */
 .rv-wordbank {
@@ -1391,6 +1401,7 @@ button { cursor: pointer; }
 }
 .rv-bank-word:hover:not(.is-used) { background: var(--accent-subtle); }
 .rv-bank-word.is-used { opacity: .3; pointer-events: none; }
+.rv-bank-word.dragging { opacity: .3; }
 
 .rv-fill-slot {
   display: inline-flex;
@@ -1410,6 +1421,7 @@ button { cursor: pointer; }
 }
 .rv-fill-slot.is-active { border-color: var(--accent); color: var(--accent); }
 .rv-fill-slot.is-filled { border-style: solid; color: var(--text1); }
+.rv-fill-slot.is-drag-over { border-color: var(--accent); background: var(--accent-subtle); }
 
 /* Matching (2.3) */
 .rv-match-wrap {
