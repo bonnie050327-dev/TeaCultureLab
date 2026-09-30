@@ -60,8 +60,6 @@ function applyRouteFromHash({ pushHistory = false } = {}) {
   if (dynasty === "review") {
     activatePanel("review", { updateUrl: pushHistory });
     if (page && page !== "l1" && REVIEW_SUBPAGES.includes(page)) {
-      // A locked tab is a disabled <button>, so clicking it is a silent no-op —
-      // deep-linking to a page you haven't unlocked just lands on 第一關 instead.
       const targetButton = document.querySelector(`.page-link[data-dynasty="review"][data-page="${page}"]`);
       if (targetButton) targetButton.click();
     }
@@ -92,7 +90,7 @@ const progress = {
 // straight to a step by clicking the timeline never adds to this — only
 // progressing forward with the next-page button does — so the checkmark
 // only ever reflects real completion, not just "earlier in the list".
-const completedPages = { tang: new Set(), song: new Set() };
+const completedPages = { tang: new Set(), song: new Set(), review: new Set() };
 
 // Each of tang's and song's 3 pages is worth 15% (6 × 15% = 90%); the
 // review page is worth the final 10%, reached once both dynasties are done.
@@ -774,9 +772,9 @@ function setupReview() {
     l2: document.getElementById("rvScore2"),
     l3: document.getElementById("rvScore3"),
   };
-  // Each level's tab (page-link) is a disabled <button> until the previous
-  // level is fully resolved — a locked tab simply can't be clicked, so no
-  // extra guard is needed in the pageButtons click handler itself.
+  // Levels are freely clickable in any order, like the Tang/Song timelines —
+  // reviewTabs is just kept around to mark each one "done" (checkmark) once
+  // its questions are all resolved.
   const reviewTabs = {
     l2: document.querySelector('.page-link[data-dynasty="review"][data-page="l2"]'),
     l3: document.querySelector('.page-link[data-dynasty="review"][data-page="l3"]'),
@@ -909,12 +907,10 @@ function setupReview() {
         el.hidden = false;
         el.textContent = `${score[levelKey]} / ${TOTALS[levelKey]}`;
       }
-      if (levelKey === "l1") reviewTabs.l2.disabled = false;
-      if (levelKey === "l2") reviewTabs.l3.disabled = false;
-      if (levelKey === "l3") {
-        l3Tip.hidden = false;
-        reviewTabs.compare.disabled = false;
-      }
+      if (levelKey === "l3") l3Tip.hidden = false;
+      completedPages.review.add(levelKey);
+      const activeReviewPage = document.querySelector('.dynasty-page.active[data-dynasty="review"]');
+      syncTimelineStates("review", activeReviewPage ? activeReviewPage.dataset.page : null);
       maybeShowFinal();
     }
   }
@@ -1432,9 +1428,8 @@ function setupReview() {
     l1Tip.hidden = true;
     l3Tip.hidden = true;
     finalEl.hidden = true;
-    reviewTabs.l2.disabled = true;
-    reviewTabs.l3.disabled = true;
-    reviewTabs.compare.disabled = true;
+    completedPages.review.clear();
+    syncTimelineStates("review", "l1");
     openAnswer.hidden = true;
     openInput.value = "";
 
@@ -1508,7 +1503,11 @@ function setupReview() {
     // whichever panel/hash the visitor actually landed on.
     activatePanel("review");
   });
-  openSubmit.addEventListener("click", () => { openAnswer.hidden = false; });
+  openSubmit.addEventListener("click", () => {
+    openAnswer.hidden = false;
+    completedPages.review.add("compare");
+    syncTimelineStates("review", "compare");
+  });
 
   build();
 }
