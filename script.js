@@ -742,6 +742,746 @@ function setupJianCha() {
 
 setupJianCha();
 
+/* ── 複習頁測驗 ────────────────────────────────────────────────────────
+   Three graded levels (生詞 / 語法 / 文化) plus an ungraded open-practice
+   card. Every question type funnels through recordFirstAttempt() so the
+   per-level and final scores only ever reflect each item's FIRST answer —
+   "再試一次" lets the learner see the right answer and keep practicing,
+   but doesn't change the score that's already been counted. */
+function setupReview() {
+  const restartBtn = document.getElementById("rvRestart");
+  const l1FillBlock = document.getElementById("rvL1FillBlock");
+  const l1ConfuseBlock = document.getElementById("rvL1ConfuseBlock");
+  const l1Tip = document.getElementById("rvL1Tip");
+  const l2Container = document.getElementById("rvL2Container");
+  const l3Grid = document.getElementById("rvL3Grid");
+  const l3Tip = document.getElementById("rvL3Tip");
+  const finalEl = document.getElementById("rvFinal");
+  const finalScoreEl = document.getElementById("rvFinalScore");
+  const finalMsgEl = document.getElementById("rvFinalMsg");
+  const openInput = document.getElementById("rvOpenInput");
+  const openSubmit = document.getElementById("rvOpenSubmit");
+  const openAnswer = document.getElementById("rvOpenAnswer");
+  const scoreEls = {
+    l1: document.getElementById("rvScore1"),
+    l2: document.getElementById("rvScore2"),
+    l3: document.getElementById("rvScore3"),
+  };
+
+  if (
+    !restartBtn || !l1FillBlock || !l1ConfuseBlock || !l1Tip || !l2Container ||
+    !l3Grid || !l3Tip || !finalEl || !finalScoreEl || !finalMsgEl ||
+    !openInput || !openSubmit || !openAnswer
+  ) return;
+
+  /* ── Data ──────────────────────────────────────────────────────────── */
+  const L1_POOL = ["繁榮", "擴散", "核心", "納入", "擺脫", "媒介", "攪打", "流傳", "調控", "提倡", "精緻", "秩序", "境界"];
+  const L1_FILL = [
+    { sentence: "這個城市過去二十年發展快速，經濟越來越＿＿。", answer: "繁榮" },
+    { sentence: "病毒很快就＿＿到其他國家。", answer: "擴散" },
+    { sentence: "這份報告的＿＿問題是學生缺乏學習動機。", answer: "核心" },
+    { sentence: "學校決定把茶文化課程＿＿正式課程中。", answer: "納入" },
+    { sentence: "他想＿＿工作壓力，所以每天去散步。", answer: "擺脫" },
+    { sentence: "語言是文化交流的重要＿＿。", answer: "媒介" },
+    { sentence: "做蛋糕時要把蛋白＿＿到出現泡沫。", answer: "攪打" },
+    { sentence: "這首詩從唐代一直＿＿到今天。", answer: "流傳" },
+    { sentence: "冷氣會自動＿＿室內溫度。", answer: "調控" },
+    { sentence: "老師＿＿大家每天閱讀二十分鐘。", answer: "提倡" },
+  ];
+  const L1_CONFUSE_OPTIONS = ["體現", "體悟", "實踐"];
+  const L1_CONFUSE = [
+    { sentence: "他在山上住了一個月，＿＿到生活不需要那麼多東西。", answer: "體悟" },
+    { sentence: "這幅畫＿＿了宋人對美感的追求。", answer: "體現" },
+    { sentence: "知道道理還不夠，還要在生活中＿＿。", answer: "實踐" },
+  ];
+  const L1_TIP = "體悟：心裡真正明白。體現：把特點表現出來。實踐：實際去做。";
+
+  const L2_REORDER = {
+    title: "1. 對（於）…而言｜句子重組",
+    explain: "用來表達「從某人或某事物的角度來看」。",
+    chunks: ["而言", "學生", "對於", "考試壓力很大"],
+    answer: ["對於", "學生", "而言", "考試壓力很大"],
+  };
+
+  const L2_FILL_BANK = ["整理茶事", "核心", "點茶", "節制", "簡樸", "學生的需求", "中心", "泡沫", "茶館"];
+  const L2_FILL_QUESTIONS = [
+    { template: "陸羽的《茶經》以＿＿為＿＿。", answer: ["整理茶事", "核心"], ordered: true },
+    { template: "宋代文人以＿＿為一種生活美學的追求。", answer: ["點茶"], ordered: true },
+    { template: "儒家提倡以＿＿、＿＿為核心。", answer: ["節制", "簡樸"], ordered: false },
+    { template: "這門課以＿＿為＿＿。", answer: ["學生的需求", "中心"], ordered: true },
+  ];
+  const L2_FILL_TIP = "以＋A＋為＋B 表示把 A 當作 B。B 通常是「核心、中心、主要考量」這類表示重要位置的詞。";
+
+  const L2_MATCH = {
+    title: "3. 透過…｜配對方式與結果",
+    explain: "用來表達「藉由某種方式，達到某種目的或產生某種結果」。",
+    pairs: [
+      { left: "透過喝茶", right: "培養好品格" },
+      { left: "透過觀察水、火與茶的變化", right: "體悟自然的秩序" },
+      { left: "透過茶筅攪打", right: "製造綿密的泡沫" },
+      { left: "透過印刷術普及", right: "茶書、茶詩廣泛流傳" },
+    ],
+  };
+
+  const L2_REWRITE = [
+    {
+      original: "因為黑色背景最能襯托白色泡沫，所以宋代流行黑色茶碗。",
+      options: [
+        "宋代之所以流行黑色茶碗，是因為黑色背景最能襯托白色泡沫。",
+        "黑色背景之所以最能襯托白色泡沫，是因為宋代流行黑色茶碗。",
+        "宋代流行黑色茶碗之所以，是因為黑色背景最能襯托白色泡沫。",
+      ],
+      answerIndex: 0,
+    },
+    {
+      original: "陸羽寫了《茶經》，所以被尊稱為「茶聖」。",
+      options: [
+        "陸羽之所以寫了《茶經》，是因為他被尊稱為「茶聖」。",
+        "陸羽之所以被尊稱為「茶聖」，是因為他寫了《茶經》。",
+        "陸羽被尊稱為「茶聖」，是因為之所以他寫了《茶經》。",
+      ],
+      answerIndex: 1,
+    },
+  ];
+  const L2_REWRITE_HINT = "「之所以」後面接結果，「是因為」後面接原因。";
+
+  const L2_SELECT = {
+    sentence: "宋代點茶不是把茶粉投入鍋中煮，而是＿＿。",
+    options: ["第一沸時加鹽", "直接在茶碗中沖泡", "把茶餅烤到微焦"],
+    answerIndex: 1,
+    hint: "A 和 C 都是唐代煎茶的步驟。宋代點茶改成直接在茶碗中沖泡。",
+  };
+
+  const L3_CARDS = [
+    { text: "把茶餅烤到微焦", answer: "唐代" },
+    { text: "第一沸加鹽", answer: "唐代" },
+    { text: "在鍑中煮茶", answer: "唐代" },
+    { text: "陸羽寫《茶經》", answer: "唐代" },
+    { text: "用茶筅攪打出泡沫", answer: "宋代" },
+    { text: "流行黑色茶碗", answer: "宋代" },
+    { text: "與插花、焚香、掛畫並列為生活四藝", answer: "宋代" },
+    { text: "印刷術普及讓茶知識流傳", answer: "宋代" },
+    { text: "要把茶碾成細粉", answer: "兩者" },
+    { text: "把茶當成修心的媒介", answer: "兩者" },
+  ];
+
+  const TOTALS = { l1: L1_FILL.length + L1_CONFUSE.length, l2: 12, l3: L3_CARDS.length };
+  const score = { l1: 0, l2: 0, l3: 0 };
+  const resolved = { l1: 0, l2: 0, l3: 0 };
+
+  /* ── Helpers ───────────────────────────────────────────────────────── */
+  function shuffle(list) {
+    const arr = list.slice();
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function pickDistractors(pool, correct, count) {
+    return shuffle(pool.filter((w) => w !== correct)).slice(0, count);
+  }
+
+  function recordFirstAttempt(levelKey, correct) {
+    resolved[levelKey] += 1;
+    if (correct) score[levelKey] += 1;
+    if (resolved[levelKey] >= TOTALS[levelKey]) {
+      const el = scoreEls[levelKey];
+      if (el) {
+        el.hidden = false;
+        el.textContent = `${score[levelKey]} / ${TOTALS[levelKey]}`;
+      }
+      if (levelKey === "l3") l3Tip.hidden = false;
+      maybeShowFinal();
+    }
+  }
+
+  function maybeShowFinal() {
+    if (resolved.l1 < TOTALS.l1 || resolved.l2 < TOTALS.l2 || resolved.l3 < TOTALS.l3) return;
+    const total = score.l1 + score.l2 + score.l3;
+    const max = TOTALS.l1 + TOTALS.l2 + TOTALS.l3;
+    finalScoreEl.textContent = `${total} / ${max}`;
+    const pct = total / max;
+    finalMsgEl.textContent =
+      pct >= 0.9 ? "太厲害了！你已經掌握唐宋茶文化的生詞、語法和文化重點。" :
+      pct >= 0.7 ? "表現不錯！回頭看看答錯的題目，會更完整喔。" :
+      "繼續加油！可以按右上角「重新開始」再練習一次。";
+    finalEl.hidden = false;
+  }
+
+  /* ── Shared multiple-choice renderer ──────────────────────────────────
+     Used by L1's fill-in-blank, L1's confusable-word set, and L2's
+     rewrite-choice / select-choice patterns — they're all "one prompt,
+     pick the right option" underneath. */
+  function renderMCQuestion(container, { numberLabel, promptHtml, options, correctAnswer, levelKey, wrongHint, onResolved }) {
+    const card = document.createElement("div");
+    card.className = "rv-question";
+    card.innerHTML = `<p class="rv-sentence"></p><div class="rv-options"></div><div class="rv-feedback" hidden></div>`;
+    const sentenceEl = card.querySelector(".rv-sentence");
+    if (numberLabel) {
+      const num = document.createElement("span");
+      num.className = "rv-question-num";
+      num.textContent = numberLabel;
+      sentenceEl.appendChild(num);
+    }
+    const promptSpan = document.createElement("span");
+    promptSpan.innerHTML = promptHtml;
+    sentenceEl.appendChild(promptSpan);
+
+    const optionsEl = card.querySelector(".rv-options");
+    const feedbackEl = card.querySelector(".rv-feedback");
+    let firstDone = false;
+    let solved = false;
+
+    function reset() {
+      optionsEl.querySelectorAll("button").forEach((b) => {
+        b.disabled = false;
+        b.classList.remove("is-correct", "is-wrong");
+      });
+      feedbackEl.hidden = true;
+      feedbackEl.innerHTML = "";
+    }
+
+    options.forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "rv-option-btn";
+      btn.textContent = opt;
+      btn.addEventListener("click", () => {
+        if (solved) return;
+        const correct = opt === correctAnswer;
+        if (!firstDone) {
+          firstDone = true;
+          recordFirstAttempt(levelKey, correct);
+          if (onResolved) onResolved(correct);
+        }
+        optionsEl.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+        feedbackEl.hidden = false;
+        if (correct) {
+          solved = true;
+          btn.classList.add("is-correct");
+          feedbackEl.className = "rv-feedback is-correct";
+          feedbackEl.textContent = "✓ 答對了！";
+        } else {
+          btn.classList.add("is-wrong");
+          optionsEl.querySelectorAll("button").forEach((b) => {
+            if (b.textContent === correctAnswer) b.classList.add("is-correct");
+          });
+          feedbackEl.className = "rv-feedback is-wrong";
+          const msg = document.createElement("span");
+          msg.textContent = `✗ 正確答案是「${correctAnswer}」${wrongHint ? "　" + wrongHint : ""}`;
+          feedbackEl.appendChild(msg);
+          const retry = document.createElement("button");
+          retry.type = "button";
+          retry.className = "rv-retry-btn";
+          retry.textContent = "再試一次";
+          retry.addEventListener("click", reset);
+          feedbackEl.appendChild(retry);
+        }
+      });
+      optionsEl.appendChild(btn);
+    });
+
+    container.appendChild(card);
+  }
+
+  /* ── Grammar pattern block wrapper (title + collapsible explanation) ── */
+  function renderPattern(container, title, explain, buildBody) {
+    const wrap = document.createElement("div");
+    wrap.className = "rv-pattern";
+    wrap.innerHTML = `
+      <div class="rv-pattern-title">${title}</div>
+      <button class="rv-explain-toggle" type="button">句式說明 ▾</button>
+      <div class="rv-explain-body" hidden>${explain}</div>
+      <div class="rv-pattern-body"></div>
+    `;
+    wrap.querySelector(".rv-explain-toggle").addEventListener("click", () => {
+      const body = wrap.querySelector(".rv-explain-body");
+      body.hidden = !body.hidden;
+    });
+    buildBody(wrap.querySelector(".rv-pattern-body"));
+    container.appendChild(wrap);
+  }
+
+  /* ── 2.1 Sentence reorder ──────────────────────────────────────────── */
+  function renderReorder(body) {
+    body.innerHTML = `
+      <div class="rv-answer-row"></div>
+      <div class="rv-chunk-pool"></div>
+      <button class="rv-check-btn" type="button" disabled>檢查</button>
+      <div class="rv-feedback" hidden></div>
+    `;
+    const answerRow = body.querySelector(".rv-answer-row");
+    const pool = body.querySelector(".rv-chunk-pool");
+    const checkBtn = body.querySelector(".rv-check-btn");
+    const feedbackEl = body.querySelector(".rv-feedback");
+    const chunks = shuffle(L2_REORDER.chunks);
+    let picked = [];
+    let firstDone = false;
+    let solved = false;
+
+    function renderChunks() {
+      pool.innerHTML = "";
+      chunks.forEach((c) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rv-chunk";
+        btn.textContent = c;
+        if (picked.includes(c)) btn.classList.add("is-used");
+        btn.addEventListener("click", () => {
+          if (solved || picked.includes(c)) return;
+          picked.push(c);
+          renderChunks();
+          renderAnswer();
+        });
+        pool.appendChild(btn);
+      });
+    }
+
+    function renderAnswer() {
+      answerRow.innerHTML = "";
+      picked.forEach((c, i) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rv-chunk";
+        btn.textContent = c;
+        btn.addEventListener("click", () => {
+          if (solved) return;
+          picked.splice(i, 1);
+          renderChunks();
+          renderAnswer();
+        });
+        answerRow.appendChild(btn);
+      });
+      checkBtn.disabled = picked.length !== L2_REORDER.answer.length;
+    }
+
+    checkBtn.addEventListener("click", () => {
+      const correct = picked.length === L2_REORDER.answer.length && picked.every((c, i) => c === L2_REORDER.answer[i]);
+      if (!firstDone) {
+        firstDone = true;
+        recordFirstAttempt("l2", correct);
+      }
+      feedbackEl.hidden = false;
+      if (correct) {
+        solved = true;
+        checkBtn.disabled = true;
+        feedbackEl.className = "rv-feedback is-correct";
+        feedbackEl.textContent = "✓ 答對了！";
+      } else {
+        feedbackEl.className = "rv-feedback is-wrong";
+        feedbackEl.innerHTML = "";
+        const msg = document.createElement("span");
+        msg.textContent = `✗ 正確答案是「${L2_REORDER.answer.join("")}」`;
+        feedbackEl.appendChild(msg);
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "rv-retry-btn";
+        retry.textContent = "再試一次";
+        retry.addEventListener("click", () => {
+          picked = [];
+          renderChunks();
+          renderAnswer();
+          feedbackEl.hidden = true;
+          feedbackEl.innerHTML = "";
+        });
+        feedbackEl.appendChild(retry);
+      }
+    });
+
+    renderChunks();
+    renderAnswer();
+  }
+
+  /* ── 2.2 Word-bank fill ────────────────────────────────────────────── */
+  function renderWordbankFill(body) {
+    body.innerHTML = `
+      <div class="rv-wordbank"></div>
+      <div class="rv-fill-questions"></div>
+      <button class="rv-check-btn" type="button" disabled>檢查</button>
+      <div class="rv-feedback" hidden></div>
+    `;
+    const bankEl = body.querySelector(".rv-wordbank");
+    const qWrap = body.querySelector(".rv-fill-questions");
+    const checkBtn = body.querySelector(".rv-check-btn");
+    const feedbackEl = body.querySelector(".rv-feedback");
+    const bankWords = shuffle(L2_FILL_BANK);
+    const filled = L2_FILL_QUESTIONS.map((q) => new Array(q.answer.length).fill(null));
+    const locked = L2_FILL_QUESTIONS.map(() => false);
+    let lastResults = null;
+    let activeSlot = null;
+    let solved = false;
+    let firstCheckDone = false;
+
+    function isWordUsed(w) {
+      return filled.some((arr) => arr.includes(w));
+    }
+
+    function evaluate(qi) {
+      const q = L2_FILL_QUESTIONS[qi];
+      const given = filled[qi];
+      return q.ordered
+        ? given.every((w, i) => w === q.answer[i])
+        : given.slice().sort().join() === q.answer.slice().sort().join();
+    }
+
+    function renderBank() {
+      bankEl.innerHTML = "";
+      bankWords.forEach((w) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rv-bank-word";
+        btn.textContent = w;
+        if (isWordUsed(w)) btn.classList.add("is-used");
+        btn.addEventListener("click", () => {
+          if (solved || isWordUsed(w) || !activeSlot) return;
+          filled[activeSlot.qi][activeSlot.bi] = w;
+          activeSlot = null;
+          renderAll();
+        });
+        bankEl.appendChild(btn);
+      });
+    }
+
+    function renderQuestions() {
+      qWrap.innerHTML = "";
+      L2_FILL_QUESTIONS.forEach((q, qi) => {
+        const p = document.createElement("p");
+        p.className = "rv-sentence";
+        const num = document.createElement("span");
+        num.className = "rv-question-num";
+        num.textContent = `${qi + 1}.`;
+        p.appendChild(num);
+        const parts = q.template.split("＿＿");
+        parts.forEach((part, idx) => {
+          p.appendChild(document.createTextNode(part));
+          if (idx < parts.length - 1) {
+            const slot = document.createElement("button");
+            slot.type = "button";
+            slot.className = "rv-fill-slot";
+            const word = filled[qi][idx];
+            slot.textContent = word || "＿＿";
+            if (word) slot.classList.add("is-filled");
+            if (activeSlot && activeSlot.qi === qi && activeSlot.bi === idx) slot.classList.add("is-active");
+            if (lastResults) {
+              if (lastResults[qi] === true) slot.classList.add("is-correct");
+              else if (lastResults[qi] === false) slot.classList.add("is-wrong");
+            }
+            slot.disabled = locked[qi];
+            slot.addEventListener("click", () => {
+              if (solved || locked[qi]) return;
+              if (word) {
+                filled[qi][idx] = null;
+                activeSlot = null;
+              } else {
+                activeSlot = { qi, bi: idx };
+              }
+              renderAll();
+            });
+            p.appendChild(slot);
+          }
+        });
+        qWrap.appendChild(p);
+      });
+    }
+
+    function renderAll() {
+      renderBank();
+      renderQuestions();
+      checkBtn.disabled = !filled.every((arr) => arr.every((w) => w !== null));
+    }
+
+    checkBtn.addEventListener("click", () => {
+      const results = L2_FILL_QUESTIONS.map((_, qi) => evaluate(qi));
+      if (!firstCheckDone) {
+        firstCheckDone = true;
+        results.forEach((ok) => recordFirstAttempt("l2", ok));
+      }
+      results.forEach((ok, qi) => { if (ok) locked[qi] = true; });
+      lastResults = results;
+      const allOk = results.every(Boolean);
+      renderAll();
+      feedbackEl.hidden = false;
+      feedbackEl.innerHTML = "";
+      const msg = document.createElement("span");
+      msg.textContent = (allOk ? "✓ 全部正確！" : "✗ 有些還不對。") + L2_FILL_TIP;
+      feedbackEl.className = allOk ? "rv-feedback is-correct" : "rv-feedback is-wrong";
+      feedbackEl.appendChild(msg);
+      if (allOk) {
+        solved = true;
+        checkBtn.disabled = true;
+      } else {
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "rv-retry-btn";
+        retry.textContent = "再試一次";
+        retry.addEventListener("click", () => {
+          results.forEach((ok, qi) => { if (!ok) filled[qi] = filled[qi].map(() => null); });
+          lastResults = null;
+          renderAll();
+          feedbackEl.hidden = true;
+        });
+        feedbackEl.appendChild(retry);
+      }
+    });
+
+    renderAll();
+  }
+
+  /* ── 2.3 Matching ──────────────────────────────────────────────────── */
+  function renderMatching(body) {
+    body.innerHTML = `
+      <div class="rv-match-wrap">
+        <div class="rv-match-col" data-col="left"></div>
+        <div class="rv-match-col" data-col="right"></div>
+      </div>
+      <button class="rv-check-btn" type="button" disabled>檢查</button>
+      <div class="rv-feedback" hidden></div>
+    `;
+    const leftCol = body.querySelector('[data-col="left"]');
+    const rightCol = body.querySelector('[data-col="right"]');
+    const checkBtn = body.querySelector(".rv-check-btn");
+    const feedbackEl = body.querySelector(".rv-feedback");
+
+    const leftItems = L2_MATCH.pairs.map((p, i) => ({ text: p.left, idx: i }));
+    const rightItems = shuffle(L2_MATCH.pairs.map((p, i) => ({ text: p.right, idx: i })));
+    const pairing = {};
+    const reversePairing = {};
+    const lockedCorrect = new Set();
+    let selectedLeft = null;
+    let lastResults = null;
+    let solved = false;
+    let firstCheckDone = false;
+
+    function renderMatch() {
+      leftCol.innerHTML = "";
+      leftItems.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rv-match-item";
+        btn.textContent = item.text;
+        const isPaired = pairing[item.idx] !== undefined;
+        if (isPaired) btn.classList.add(`rv-pair-${item.idx % 4}`);
+        if (selectedLeft === item.idx) btn.classList.add("is-selected");
+        if (lastResults && lastResults[item.idx] === true) btn.classList.add("is-correct");
+        if (lastResults && lastResults[item.idx] === false) btn.classList.add("is-wrong");
+        btn.disabled = solved || lockedCorrect.has(item.idx);
+        btn.addEventListener("click", () => {
+          if (solved || lockedCorrect.has(item.idx)) return;
+          if (isPaired) {
+            const r = pairing[item.idx];
+            delete pairing[item.idx];
+            delete reversePairing[r];
+            selectedLeft = null;
+            lastResults = null;
+          } else {
+            selectedLeft = selectedLeft === item.idx ? null : item.idx;
+          }
+          renderMatch();
+        });
+        leftCol.appendChild(btn);
+      });
+
+      rightCol.innerHTML = "";
+      rightItems.forEach((item) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rv-match-item";
+        btn.textContent = item.text;
+        const pairedLeft = reversePairing[item.idx];
+        const isPaired = pairedLeft !== undefined;
+        if (isPaired) btn.classList.add(`rv-pair-${pairedLeft % 4}`);
+        if (lastResults && isPaired && lastResults[pairedLeft] === true) btn.classList.add("is-correct");
+        if (lastResults && isPaired && lastResults[pairedLeft] === false) btn.classList.add("is-wrong");
+        btn.disabled = solved || (isPaired && lockedCorrect.has(pairedLeft));
+        btn.addEventListener("click", () => {
+          if (solved) return;
+          if (isPaired) {
+            if (lockedCorrect.has(pairedLeft)) return;
+            delete pairing[pairedLeft];
+            delete reversePairing[item.idx];
+            lastResults = null;
+            renderMatch();
+            return;
+          }
+          if (selectedLeft === null) return;
+          pairing[selectedLeft] = item.idx;
+          reversePairing[item.idx] = selectedLeft;
+          selectedLeft = null;
+          lastResults = null;
+          renderMatch();
+        });
+        rightCol.appendChild(btn);
+      });
+
+      checkBtn.disabled = Object.keys(pairing).length !== leftItems.length;
+    }
+
+    checkBtn.addEventListener("click", () => {
+      const results = {};
+      leftItems.forEach((item) => {
+        results[item.idx] = pairing[item.idx] === item.idx;
+      });
+      if (!firstCheckDone) {
+        firstCheckDone = true;
+        Object.values(results).forEach((ok) => recordFirstAttempt("l2", ok));
+      }
+      leftItems.forEach((item) => { if (results[item.idx]) lockedCorrect.add(item.idx); });
+      lastResults = results;
+      const allOk = Object.values(results).every(Boolean);
+      renderMatch();
+      feedbackEl.hidden = false;
+      feedbackEl.innerHTML = "";
+      if (allOk) {
+        solved = true;
+        feedbackEl.className = "rv-feedback is-correct";
+        feedbackEl.textContent = "✓ 全部配對正確！";
+      } else {
+        feedbackEl.className = "rv-feedback is-wrong";
+        feedbackEl.textContent = "✗ 紅色的配對不正確，請點一下解除配對，再試一次。";
+      }
+    });
+
+    renderMatch();
+  }
+
+  /* ── Level 3 culture card ──────────────────────────────────────────── */
+  function renderCultureCard(container, item) {
+    const card = document.createElement("div");
+    card.className = "rv-culture-card";
+    card.innerHTML = `<p class="rv-culture-text"></p><div class="rv-culture-options"></div>`;
+    card.querySelector(".rv-culture-text").textContent = item.text;
+    const optsEl = card.querySelector(".rv-culture-options");
+    let firstDone = false;
+    let solved = false;
+
+    ["唐代", "宋代", "兩者"].forEach((label) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "rv-culture-btn";
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        if (solved) return;
+        const correct = label === item.answer;
+        if (!firstDone) {
+          firstDone = true;
+          recordFirstAttempt("l3", correct);
+        }
+        optsEl.querySelectorAll("button").forEach((b) => { b.disabled = true; });
+        if (correct) {
+          solved = true;
+          btn.classList.add("is-correct");
+          return;
+        }
+        btn.classList.add("is-wrong");
+        optsEl.querySelectorAll("button").forEach((b) => {
+          if (b.textContent === item.answer) b.classList.add("is-correct");
+        });
+        const feedbackEl = document.createElement("div");
+        feedbackEl.className = "rv-feedback is-wrong";
+        const msg = document.createElement("span");
+        msg.textContent = `✗ 正確答案是「${item.answer}」`;
+        feedbackEl.appendChild(msg);
+        const retry = document.createElement("button");
+        retry.type = "button";
+        retry.className = "rv-retry-btn";
+        retry.textContent = "再試一次";
+        retry.addEventListener("click", () => {
+          optsEl.querySelectorAll("button").forEach((b) => { b.disabled = false; b.classList.remove("is-correct", "is-wrong"); });
+          feedbackEl.remove();
+        });
+        feedbackEl.appendChild(retry);
+        card.appendChild(feedbackEl);
+      });
+      optsEl.appendChild(btn);
+    });
+
+    container.appendChild(card);
+  }
+
+  /* ── Build (and rebuild, on restart) ──────────────────────────────── */
+  function build() {
+    score.l1 = 0; score.l2 = 0; score.l3 = 0;
+    resolved.l1 = 0; resolved.l2 = 0; resolved.l3 = 0;
+    scoreEls.l1.hidden = true;
+    scoreEls.l2.hidden = true;
+    scoreEls.l3.hidden = true;
+    l1Tip.hidden = true;
+    l3Tip.hidden = true;
+    finalEl.hidden = true;
+    openAnswer.hidden = true;
+    openInput.value = "";
+
+    l1FillBlock.innerHTML = "";
+    L1_FILL.forEach((q, qi) => {
+      const options = shuffle([q.answer, ...pickDistractors(L1_POOL, q.answer, 3)]);
+      renderMCQuestion(l1FillBlock, {
+        numberLabel: `${qi + 1}.`,
+        promptHtml: q.sentence.replace("＿＿", '<span class="rv-blank"></span>'),
+        options,
+        correctAnswer: q.answer,
+        levelKey: "l1",
+      });
+    });
+
+    l1ConfuseBlock.innerHTML = "";
+    let confuseDone = 0;
+    L1_CONFUSE.forEach((q, qi) => {
+      renderMCQuestion(l1ConfuseBlock, {
+        numberLabel: `${L1_FILL.length + qi + 1}.`,
+        promptHtml: q.sentence.replace("＿＿", '<span class="rv-blank"></span>'),
+        options: L1_CONFUSE_OPTIONS,
+        correctAnswer: q.answer,
+        levelKey: "l1",
+        onResolved: () => {
+          confuseDone += 1;
+          if (confuseDone === L1_CONFUSE.length) {
+            l1Tip.hidden = false;
+            l1Tip.textContent = L1_TIP;
+          }
+        },
+      });
+    });
+
+    l2Container.innerHTML = "";
+    renderPattern(l2Container, L2_REORDER.title, L2_REORDER.explain, renderReorder);
+    renderPattern(l2Container, "2. 以…為…｜詞卡填空", "用來表達「把某人或某事物當作……」。", renderWordbankFill);
+    renderPattern(l2Container, L2_MATCH.title, L2_MATCH.explain, renderMatching);
+    renderPattern(l2Container, "4. （之）所以…是因為…｜選出正確的改寫", "用來說明某個結果或現象的原因。", (b) => {
+      L2_REWRITE.forEach((q, qi) => {
+        renderMCQuestion(b, {
+          numberLabel: `第 ${qi + 1} 題`,
+          promptHtml: `原句：${q.original}`,
+          options: q.options,
+          correctAnswer: q.options[q.answerIndex],
+          levelKey: "l2",
+          wrongHint: L2_REWRITE_HINT,
+        });
+      });
+    });
+    renderPattern(l2Container, "5. 不是…而是…｜選擇", "用來表達「否定 A，強調 B」。", (b) => {
+      renderMCQuestion(b, {
+        promptHtml: L2_SELECT.sentence.replace("＿＿", '<span class="rv-blank"></span>'),
+        options: L2_SELECT.options,
+        correctAnswer: L2_SELECT.options[L2_SELECT.answerIndex],
+        levelKey: "l2",
+        wrongHint: L2_SELECT.hint,
+      });
+    });
+
+    l3Grid.innerHTML = "";
+    shuffle(L3_CARDS).forEach((item) => renderCultureCard(l3Grid, item));
+  }
+
+  restartBtn.addEventListener("click", build);
+  openSubmit.addEventListener("click", () => { openAnswer.hidden = false; });
+
+  build();
+}
+
+setupReview();
+
 if (window.location.hash) {
   applyRouteFromHash();
 } else {
