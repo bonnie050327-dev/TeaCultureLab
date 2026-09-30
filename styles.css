@@ -109,6 +109,11 @@
 /* ── Reset + Base ───────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Author display rules (e.g. .rv-culture-grid{display:grid}) otherwise
+   outrank the UA's [hidden] stylesheet, so toggling el.hidden alone
+   wouldn't hide elements that also set their own display value. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
@@ -1140,6 +1145,16 @@ button { cursor: pointer; }
   margin-bottom: var(--space-lg);
   color: var(--text2);
   font-size: var(--text-body-sm);
+}
+
+.rv-locked-msg {
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-lg);
+  border: 1.5px dashed var(--border-visible);
+  border-radius: var(--radius-component);
+  color: var(--text3);
+  font-size: var(--text-body-sm);
+  text-align: center;
 }
 
 .rv-block { margin-bottom: var(--space-lg); }

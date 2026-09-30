@@ -756,6 +756,8 @@ function setupReview() {
   const l2Container = document.getElementById("rvL2Container");
   const l3Grid = document.getElementById("rvL3Grid");
   const l3Tip = document.getElementById("rvL3Tip");
+  const locked2 = document.getElementById("rvLocked2");
+  const locked3 = document.getElementById("rvLocked3");
   const finalEl = document.getElementById("rvFinal");
   const finalScoreEl = document.getElementById("rvFinalScore");
   const finalMsgEl = document.getElementById("rvFinalMsg");
@@ -770,7 +772,7 @@ function setupReview() {
 
   if (
     !restartBtn || !l1FillBlock || !l1ConfuseBlock || !l1Tip || !l2Container ||
-    !l3Grid || !l3Tip || !finalEl || !finalScoreEl || !finalMsgEl ||
+    !l3Grid || !l3Tip || !locked2 || !locked3 || !finalEl || !finalScoreEl || !finalMsgEl ||
     !openInput || !openSubmit || !openAnswer
   ) return;
 
@@ -891,6 +893,14 @@ function setupReview() {
       if (el) {
         el.hidden = false;
         el.textContent = `${score[levelKey]} / ${TOTALS[levelKey]}`;
+      }
+      if (levelKey === "l1") {
+        locked2.hidden = true;
+        l2Container.hidden = false;
+      }
+      if (levelKey === "l2") {
+        locked3.hidden = true;
+        l3Grid.hidden = false;
       }
       if (levelKey === "l3") l3Tip.hidden = false;
       maybeShowFinal();
@@ -1410,6 +1420,10 @@ function setupReview() {
     l1Tip.hidden = true;
     l3Tip.hidden = true;
     finalEl.hidden = true;
+    locked2.hidden = false;
+    locked3.hidden = false;
+    l2Container.hidden = true;
+    l3Grid.hidden = true;
     openAnswer.hidden = true;
     openInput.value = "";
 
