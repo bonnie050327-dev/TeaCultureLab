@@ -881,7 +881,8 @@ function setupReview() {
     { text: "把茶當成修心的媒介", answer: "兩者" },
   ];
 
-  const TOTALS = { l1: L1_FILL.length + L1_CONFUSE.length, l2: 12, l3: L3_CARDS.length };
+  const L1_QUESTION_COUNT = 5;
+  const TOTALS = { l1: L1_QUESTION_COUNT, l2: 12, l3: L3_CARDS.length };
   const score = { l1: 0, l2: 0, l3: 0 };
   const resolved = { l1: 0, l2: 0, l3: 0 };
 
@@ -1437,34 +1438,36 @@ function setupReview() {
     openAnswer.hidden = true;
     openInput.value = "";
 
+    // Level 1 draws a fresh random 5 of the 13 available questions (mixed
+    // fill-in-the-blank + confusable-word) every time — build() runs both
+    // on first load and on every "重新開始", so this reshuffles then too.
     l1FillBlock.innerHTML = "";
-    L1_FILL.forEach((q, qi) => {
-      const options = shuffle([q.answer, ...pickDistractors(L1_POOL, q.answer, 3)]);
+    l1ConfuseBlock.innerHTML = "";
+    const l1Pool = [
+      ...L1_FILL.map((q) => ({ ...q, kind: "fill" })),
+      ...L1_CONFUSE.map((q) => ({ ...q, kind: "confuse" })),
+    ];
+    const l1Selected = shuffle(l1Pool).slice(0, L1_QUESTION_COUNT);
+    const selectedConfuseCount = l1Selected.filter((q) => q.kind === "confuse").length;
+    let confuseDone = 0;
+
+    l1Selected.forEach((q, qi) => {
+      const options = q.kind === "fill"
+        ? shuffle([q.answer, ...pickDistractors(L1_POOL, q.answer, 3)])
+        : L1_CONFUSE_OPTIONS;
       renderMCQuestion(l1FillBlock, {
         numberLabel: `${qi + 1}.`,
         promptHtml: q.sentence.replace("＿＿", '<span class="rv-blank"></span>'),
         options,
         correctAnswer: q.answer,
         levelKey: "l1",
-      });
-    });
-
-    l1ConfuseBlock.innerHTML = "";
-    let confuseDone = 0;
-    L1_CONFUSE.forEach((q, qi) => {
-      renderMCQuestion(l1ConfuseBlock, {
-        numberLabel: `${L1_FILL.length + qi + 1}.`,
-        promptHtml: q.sentence.replace("＿＿", '<span class="rv-blank"></span>'),
-        options: L1_CONFUSE_OPTIONS,
-        correctAnswer: q.answer,
-        levelKey: "l1",
-        onResolved: () => {
+        onResolved: q.kind === "confuse" ? () => {
           confuseDone += 1;
-          if (confuseDone === L1_CONFUSE.length) {
+          if (confuseDone === selectedConfuseCount) {
             l1Tip.hidden = false;
             l1Tip.textContent = L1_TIP;
           }
-        },
+        } : undefined,
       });
     });
 
