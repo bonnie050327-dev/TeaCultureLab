@@ -185,7 +185,7 @@
               </div>
 
               <div class="dc-header-row">
-                <div class="answer-header">點選下方的步驟按鈕，依正確順序完成一鍑唐代煎茶。順序錯了會有提示，可以再試一次。</div>
+                <div class="answer-header">點選下方的步驟按鈕，依正確順序完成一鍑唐代煎茶。</div>
                 <button class="dc-restart" id="tcRestart" type="button" aria-label="重新開始">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 12a9 9 0 1 0 3-6.7" />
@@ -351,15 +351,28 @@
 
               <p class="dc-status" id="tcStatus" aria-live="polite"></p>
 
-              <div class="dc-actions" id="tcActions">
-                <button class="dc-action-btn" data-action="zhi" type="button"><span class="dc-check">✓</span><span>炙茶</span></button>
-                <button class="dc-action-btn" data-action="qushui" type="button"><span class="dc-check">✓</span><span>取一瓢水並投入茶粉</span></button>
-                <button class="dc-action-btn" data-action="nian" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
-                <button class="dc-action-btn" data-action="re" type="button"><span class="dc-check">✓</span><span id="tcReLabel">加熱（一沸）</span></button>
-                <button class="dc-action-btn" data-action="daohui" type="button"><span class="dc-check">✓</span><span>倒回瓢水</span></button>
-                <button class="dc-action-btn" data-action="shai" type="button"><span class="dc-check">✓</span><span>篩茶</span></button>
-                <button class="dc-action-btn" data-action="fencha" type="button"><span class="dc-check">✓</span><span>分茶</span></button>
-                <button class="dc-action-btn" data-action="yan" type="button"><span class="dc-check">✓</span><span>加鹽</span></button>
+              <div class="dc-slots" id="tcSlots" aria-label="已完成的步驟順序">
+                <div class="dc-slot" data-slot="0">1</div>
+                <div class="dc-slot" data-slot="1">2</div>
+                <div class="dc-slot" data-slot="2">3</div>
+                <div class="dc-slot" data-slot="3">4</div>
+                <div class="dc-slot" data-slot="4">5</div>
+                <div class="dc-slot" data-slot="5">6</div>
+                <div class="dc-slot" data-slot="6">7</div>
+                <div class="dc-slot" data-slot="7">8</div>
+                <div class="dc-slot" data-slot="8">9</div>
+                <div class="dc-slot" data-slot="9">10</div>
+              </div>
+
+              <div class="dc-actions" id="tcActions" style="--dc-cols:4">
+                <button class="dc-action-btn" data-action="nian" draggable="true" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
+                <button class="dc-action-btn" data-action="re" draggable="true" type="button"><span class="dc-check">✓</span><span id="tcReLabel">加熱（一沸）</span></button>
+                <button class="dc-action-btn" data-action="zhi" draggable="true" type="button"><span class="dc-check">✓</span><span>炙茶</span></button>
+                <button class="dc-action-btn" data-action="yan" draggable="true" type="button"><span class="dc-check">✓</span><span>加鹽</span></button>
+                <button class="dc-action-btn" data-action="fencha" draggable="true" type="button"><span class="dc-check">✓</span><span>分茶</span></button>
+                <button class="dc-action-btn" data-action="shai" draggable="true" type="button"><span class="dc-check">✓</span><span>篩茶</span></button>
+                <button class="dc-action-btn" data-action="qushui" draggable="true" type="button"><span class="dc-check">✓</span><span>取一瓢水並投入茶粉</span></button>
+                <button class="dc-action-btn" data-action="daohui" draggable="true" type="button"><span class="dc-check">✓</span><span>倒回瓢水</span></button>
               </div>
 
               <div class="dc-summary" id="tcSummary" hidden>
@@ -565,13 +578,23 @@
 
               <p class="dc-status" id="dcStatus" aria-live="polite"></p>
 
-              <div class="dc-actions" id="dcActions">
-                <button class="dc-action-btn" data-action="warm" type="button"><span class="dc-check">✓</span><span>溫碗</span></button>
-                <button class="dc-action-btn" data-action="whisk" type="button"><span class="dc-check">✓</span><span>少量注水攪打</span></button>
-                <button class="dc-action-btn" data-action="grind" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
-                <button class="dc-action-btn" data-action="dump" type="button"><span class="dc-check">✓</span><span>一次注滿熱水</span></button>
-                <button class="dc-action-btn" data-action="paste" type="button"><span class="dc-check">✓</span><span>調膏</span></button>
-                <button class="dc-action-btn" data-action="sift" type="button"><span class="dc-check">✓</span><span>篩粉</span></button>
+              <div class="dc-slots" id="dcSlots" aria-label="已完成的步驟順序">
+                <div class="dc-slot" data-slot="0">1</div>
+                <div class="dc-slot" data-slot="1">2</div>
+                <div class="dc-slot" data-slot="2">3</div>
+                <div class="dc-slot" data-slot="3">4</div>
+                <div class="dc-slot" data-slot="4">5</div>
+                <div class="dc-slot" data-slot="5">6</div>
+                <div class="dc-slot" data-slot="6">7</div>
+              </div>
+
+              <div class="dc-actions" id="dcActions" style="--dc-cols:3">
+                <button class="dc-action-btn" data-action="warm" draggable="true" type="button"><span class="dc-check">✓</span><span>溫碗</span></button>
+                <button class="dc-action-btn" data-action="grind" draggable="true" type="button"><span class="dc-check">✓</span><span>碾茶</span></button>
+                <button class="dc-action-btn" data-action="dump" draggable="true" type="button"><span class="dc-check">✓</span><span>一次注滿熱水</span></button>
+                <button class="dc-action-btn" data-action="sift" draggable="true" type="button"><span class="dc-check">✓</span><span>篩粉</span></button>
+                <button class="dc-action-btn" data-action="whisk" draggable="true" type="button"><span class="dc-check">✓</span><span>少量注水攪打</span></button>
+                <button class="dc-action-btn" data-action="paste" draggable="true" type="button"><span class="dc-check">✓</span><span>調膏</span></button>
               </div>
 
               <div class="dc-summary" id="dcSummary" hidden>

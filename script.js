@@ -309,17 +309,81 @@ if (songPanel) setupUtensilMatching(songPanel);
 // simulations (setupJianCha / setupDianCha below) instead of a shared
 // drag/click workbench.
 
+// Shared by both simulations: lets the learner drag (or click, which is
+// treated as an instant drag-and-drop) a step button into the next empty
+// slot. A wrong drop never moves the button — it just stays put, which is
+// the "bounces back to its original position" behavior — and the caller's
+// shake feedback still fires as normal.
+function wireSlotsAndDragDrop(actionsEl, slotsEl) {
+  const slotEls = Array.from(slotsEl.querySelectorAll(".dc-slot"));
+
+  function fillSlot(index, label) {
+    const slot = slotEls[index];
+    if (!slot) return;
+    slot.textContent = label;
+    slot.classList.add("filled");
+  }
+
+  function highlightNext(step) {
+    slotEls.forEach((slot, i) => slot.classList.toggle("is-next", i === step));
+  }
+
+  function resetSlots() {
+    slotEls.forEach((slot, i) => {
+      slot.textContent = String(i + 1);
+      slot.classList.remove("filled", "is-next");
+    });
+  }
+
+  actionsEl.addEventListener("dragstart", (event) => {
+    const btn = event.target.closest(".dc-action-btn");
+    if (!btn || btn.disabled) {
+      event.preventDefault();
+      return;
+    }
+    event.dataTransfer.setData("text/plain", btn.dataset.action);
+    event.dataTransfer.effectAllowed = "move";
+    btn.classList.add("dragging");
+  });
+
+  actionsEl.addEventListener("dragend", (event) => {
+    const btn = event.target.closest(".dc-action-btn");
+    if (btn) btn.classList.remove("dragging");
+  });
+
+  slotsEl.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    slotsEl.classList.add("is-drag-over");
+  });
+
+  slotsEl.addEventListener("dragleave", () => {
+    slotsEl.classList.remove("is-drag-over");
+  });
+
+  slotsEl.addEventListener("drop", (event) => {
+    event.preventDefault();
+    slotsEl.classList.remove("is-drag-over");
+    const action = event.dataTransfer.getData("text/plain");
+    if (action) actionsEl.dispatchEvent(new CustomEvent("dc-drop-action", { detail: action }));
+  });
+
+  return { fillSlot, highlightNext, resetSlots };
+}
+
 /* ── 宋代點茶模擬 ──────────────────────────────────────────────────── */
 function setupDianCha() {
   const scene = document.getElementById("dcScene");
   const sceneWrap = document.getElementById("dcSceneWrap");
   const statusEl = document.getElementById("dcStatus");
   const actionsEl = document.getElementById("dcActions");
+  const slotsEl = document.getElementById("dcSlots");
   const summaryEl = document.getElementById("dcSummary");
   const restartBtn = document.getElementById("dcRestart");
   const foamGroup = document.getElementById("dcFoamGroup");
 
-  if (!scene || !sceneWrap || !statusEl || !actionsEl || !summaryEl || !restartBtn || !foamGroup) return;
+  if (!scene || !sceneWrap || !statusEl || !actionsEl || !slotsEl || !summaryEl || !restartBtn || !foamGroup) return;
+
+  const { fillSlot, highlightNext, resetSlots } = wireSlotsAndDragDrop(actionsEl, slotsEl);
 
   const START_MSG = "先從第一步開始吧！";
 
@@ -408,6 +472,7 @@ function setupDianCha() {
 
     summaryEl.hidden = state.step < 7;
     restartBtn.classList.toggle("is-alert", state.failed);
+    highlightNext(state.failed || state.step >= 7 ? -1 : state.step);
   }
 
   function showStatus(msg, isError) {
@@ -415,7 +480,14 @@ function setupDianCha() {
     statusEl.classList.toggle("is-error", !!isError);
   }
 
-  function succeed(nextStep) {
+  function labelFor(action) {
+    const btn = actionsEl.querySelector(`[data-action="${action}"]`);
+    const span = btn ? btn.querySelector("span:last-child") : null;
+    return span ? span.textContent : action;
+  }
+
+  function succeed(nextStep, action) {
+    fillSlot(nextStep - 1, labelFor(action));
     state.step = nextStep;
     showStatus(SUCCESS_MSG[nextStep], false);
     render();
@@ -440,27 +512,27 @@ function setupDianCha() {
     if (action === "dump") { hardFail(); return; }
 
     if (action === "grind") {
-      if (step === 0) succeed(1);
+      if (step === 0) succeed(1, action);
       return;
     }
     if (action === "sift") {
-      if (step === 1) succeed(2);
+      if (step === 1) succeed(2, action);
       else if (step === 0) fail("還沒有茶末可以篩喔。");
       return;
     }
     if (action === "warm") {
-      if (step === 2) succeed(3);
+      if (step === 2) succeed(3, action);
       else if (step < 2) fail("茶粉還不夠細，先篩一篩吧。");
       return;
     }
     if (action === "paste") {
-      if (step === 3) succeed(4);
+      if (step === 3) succeed(4, action);
       else if (step === 2) fail("碗還是冷的，茶膏調不勻。");
       else if (step < 2) fail("茶粉還不夠細，先篩一篩吧。");
       return;
     }
     if (action === "whisk") {
-      if (step >= 4 && step < 7) succeed(step + 1);
+      if (step >= 4 && step < 7) succeed(step + 1, action);
       else if (step < 4) fail("直接加水，茶粉會結塊。先調成茶膏吧。");
       return;
     }
@@ -470,6 +542,7 @@ function setupDianCha() {
     state.step = 0;
     state.failed = false;
     clearDone();
+    resetSlots();
     showStatus(START_MSG, false);
     render();
   }
@@ -479,6 +552,8 @@ function setupDianCha() {
     if (!btn) return;
     handleAction(btn.dataset.action);
   });
+
+  actionsEl.addEventListener("dc-drop-action", (event) => handleAction(event.detail));
 
   restartBtn.addEventListener("click", resetAll);
 
@@ -494,11 +569,14 @@ function setupJianCha() {
   const sceneWrap = document.getElementById("tcSceneWrap");
   const statusEl = document.getElementById("tcStatus");
   const actionsEl = document.getElementById("tcActions");
+  const slotsEl = document.getElementById("tcSlots");
   const summaryEl = document.getElementById("tcSummary");
   const restartBtn = document.getElementById("tcRestart");
   const reLabel = document.getElementById("tcReLabel");
 
-  if (!scene || !sceneWrap || !statusEl || !actionsEl || !summaryEl || !restartBtn || !reLabel) return;
+  if (!scene || !sceneWrap || !statusEl || !actionsEl || !slotsEl || !summaryEl || !restartBtn || !reLabel) return;
+
+  const { fillSlot, highlightNext, resetSlots } = wireSlotsAndDragDrop(actionsEl, slotsEl);
 
   const START_MSG = "先從第一步開始吧！";
 
@@ -561,6 +639,7 @@ function setupJianCha() {
 
     summaryEl.hidden = state.step < 10;
     restartBtn.classList.toggle("is-alert", state.failed);
+    highlightNext(state.failed || state.step >= 10 ? -1 : state.step);
   }
 
   function showStatus(msg, isError) {
@@ -568,7 +647,14 @@ function setupJianCha() {
     statusEl.classList.toggle("is-error", !!isError);
   }
 
-  function succeed(nextStep) {
+  function labelFor(action) {
+    const btn = actionsEl.querySelector(`[data-action="${action}"]`);
+    const span = btn ? btn.querySelector("span:last-child") : null;
+    return span ? span.textContent : action;
+  }
+
+  function succeed(nextStep, action) {
+    fillSlot(nextStep - 1, labelFor(action));
     state.step = nextStep;
     showStatus(SUCCESS_MSG[nextStep], false);
     render();
@@ -591,23 +677,23 @@ function setupJianCha() {
     const step = state.step;
 
     if (action === "zhi") {
-      if (step === 0) succeed(1);
+      if (step === 0) succeed(1, action);
       return;
     }
     if (action === "nian") {
-      if (step === 1) succeed(2);
+      if (step === 1) succeed(2, action);
       else if (step === 0) fail("茶餅還沒烤過，香氣出不來喔。");
       return;
     }
     if (action === "shai") {
-      if (step === 2) succeed(3);
+      if (step === 2) succeed(3, action);
       else if (step < 2) fail("茶餅還是一整塊，沒辦法篩。");
       return;
     }
     if (action === "re") {
-      if (step === 3) { succeed(4); return; }
-      if (step === 5) { succeed(6); return; }
-      if (step === 7) { succeed(8); return; }
+      if (step === 3) { succeed(4, action); return; }
+      if (step === 5) { succeed(6, action); return; }
+      if (step === 7) { succeed(8, action); return; }
       if (step < 3) { fail("茶粉還沒準備好，先把茶處理好吧。"); return; }
       if (step === 4) { fail("已經一沸了，先加鹽吧。"); return; }
       if (step === 6) { fail("已經二沸了，先取水投茶吧。"); return; }
@@ -615,22 +701,22 @@ function setupJianCha() {
       return;
     }
     if (action === "yan") {
-      if (step === 4) succeed(5);
+      if (step === 4) succeed(5, action);
       else fail("陸羽說要在一沸時加鹽喔。");
       return;
     }
     if (action === "qushui") {
-      if (step === 6) succeed(7);
+      if (step === 6) succeed(7, action);
       else fail("陸羽說要在二沸時取水、投入茶粉。");
       return;
     }
     if (action === "daohui") {
-      if (step === 8) succeed(9);
+      if (step === 8) succeed(9, action);
       else fail("還沒到三沸，不需要止沸。");
       return;
     }
     if (action === "fencha") {
-      if (step === 9) succeed(10);
+      if (step === 9) succeed(10, action);
       else fail("茶還沒煮好，先完成三沸吧。");
       return;
     }
@@ -640,6 +726,7 @@ function setupJianCha() {
     state.step = 0;
     state.failed = false;
     clearDone();
+    resetSlots();
     showStatus(START_MSG, false);
     render();
   }
@@ -649,6 +736,8 @@ function setupJianCha() {
     if (!btn) return;
     handleAction(btn.dataset.action);
   });
+
+  actionsEl.addEventListener("dc-drop-action", (event) => handleAction(event.detail));
 
   restartBtn.addEventListener("click", resetAll);
 
